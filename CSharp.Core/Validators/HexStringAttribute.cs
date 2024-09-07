@@ -19,7 +19,7 @@ namespace CSharp.Core.Validators;
 /// </summary>
 public class HexStringAttribute : ValidationAttribute
 {
-    override protected ValidationResult IsValid(object value, ValidationContext validationContext)
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         var stringValue = value as string;
         if (string.IsNullOrEmpty(stringValue))

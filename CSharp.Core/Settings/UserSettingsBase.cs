@@ -35,7 +35,7 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    abstract protected void ApplyDefaults();
+    protected abstract void ApplyDefaults();
 
     protected T Get<T>([CallerMemberName] string key = null)
     {
