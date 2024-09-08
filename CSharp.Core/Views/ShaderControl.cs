@@ -355,7 +355,7 @@ public class ShaderControl : UserControl
                 targetWidth, targetHeight
             };
 
-            foreach (var (name, getValue) in m_customUniforms)
+            foreach (var (name, getValue) in m_customUniforms.ToArray())
                 m_uniforms[name] = getValue();
 
             SKRuntimeEffectChildren children = null;
