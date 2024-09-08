@@ -21,4 +21,11 @@ public static class StringExtensions
         });
         return badChars.Aggregate(s, (current, nameChar) => current.Replace(nameChar, '_'));
     }
+
+    public static IEnumerable<string> ReadAllLines(this string s)
+    {
+        using var reader = new StringReader(s);
+        while (reader.ReadLine() is { } line)
+            yield return line;
+    }
 }
