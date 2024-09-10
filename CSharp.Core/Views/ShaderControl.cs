@@ -137,7 +137,7 @@ public class ShaderControl : UserControl
         if (m_sourceControlBitmap == null || m_sourceControlBitmap.Width != (int)Bounds.Width || m_sourceControlBitmap.Height != (int)Bounds.Height)
         {
             m_sourceControlBitmap?.Dispose();
-            m_sourceControlBitmap = new SKBitmap(new SKImageInfo((int)Bounds.Width, (int)Bounds.Height, SKColorType.Rgba8888, SKAlphaType.Premul));
+            m_sourceControlBitmap = new SKBitmap(new SKImageInfo((int)Bounds.Width, (int)Bounds.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
         }
 
         using var rtb = new RenderTargetBitmap(new PixelSize(m_sourceControlBitmap.Width, m_sourceControlBitmap.Height));
