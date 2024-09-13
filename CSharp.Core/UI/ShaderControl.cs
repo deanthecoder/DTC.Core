@@ -19,7 +19,7 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using SkiaSharp;
 
-namespace CSharp.Core.Views;
+namespace CSharp.Core.UI;
 
 /// <summary>
 /// A custom Avalonia control that applies a shader effect to a visual element.
