@@ -8,10 +8,9 @@
 // about your modifications. Your contributions are valued!
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
-namespace CSharp.Core;
-
 using OpenCvSharp;
-using System.Threading.Tasks;
+
+namespace CSharp.Core.ImageProcessing;
 
 public static class WebCam
 {
