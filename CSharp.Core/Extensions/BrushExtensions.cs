@@ -22,4 +22,12 @@ public static class BrushExtensions
             throw new ArgumentException("Cannot find brush's color.");
         return (Color)color;
     }
+
+    public static Color SetBrightness(this Color rgb, double f)
+    {
+        var r = (byte)(rgb.R * f);
+        var g = (byte)(rgb.G * f);
+        var b = (byte)(rgb.B * f);
+        return Color.Parse($"#{r:X2}{g:X2}{b:X2}");
+    }
 }
