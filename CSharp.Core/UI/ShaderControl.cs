@@ -421,8 +421,8 @@ public class ShaderControl : UserControl
                     destRect.Height / sourceRect.Height);
 
                 var translateMatrix = Matrix.CreateTranslation(
-                    (-sourceRect.X + destRect.X) - bounds.Top,
-                    (-sourceRect.Y + destRect.Y) - bounds.Left);
+                    -sourceRect.X + destRect.X - bounds.Top,
+                    -sourceRect.Y + destRect.Y - bounds.Left);
 
                 using (context.PushClip(destRect))
                 using (context.PushPostTransform(translateMatrix * scaleMatrix))

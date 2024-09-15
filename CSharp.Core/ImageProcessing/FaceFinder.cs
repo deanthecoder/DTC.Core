@@ -49,12 +49,21 @@ public class FaceFinder
 
         // Send the POST request
         using var httpClient = new HttpClient();
-        var response = await httpClient.PostAsync(requestUrl, form);
-        response.EnsureSuccessStatusCode(); // Throw an exception if the request fails
-
-        var responseContent = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response;
+        try
+        {
+            response = await httpClient.PostAsync(requestUrl, form);
+            if (!response.IsSuccessStatusCode)
+                return null; // Failed.
+        }
+        catch (Exception)
+        {
+            // Network access problem.
+            return null;
+        }
 
         // Parse the JSON response to extract face details
+        var responseContent = await response.Content.ReadAsStringAsync();
         return ParseFaceDetails(responseContent);
     }
 
@@ -88,10 +97,13 @@ public class FaceFinder
 
     private static FaceDetails ParseFaceDetails(string jsonResponse)
     {
+        if (string.IsNullOrEmpty(jsonResponse))
+            return null; // Failed.
+        
         // Navigate through the JSON structure to extract the necessary data
         var parsed = JObject.Parse(jsonResponse);
-        var photo = parsed["photos"]?[0];
-        var tag = photo?["tags"]?[0];
+        var photo = parsed["photos"]?.FirstOrDefault();
+        var tag = photo?["tags"]?.FirstOrDefault();
         if (tag == null)
             return null;
 
@@ -113,11 +125,34 @@ public class FaceFinder
 
     public class FaceDetails
     {
+        /// <summary>
+        /// Feature position (as a percentage).
+        /// </summary>
         public Point FaceCenter { get; init; }
+
+        /// <summary>
+        /// Feature position (as a percentage).
+        /// </summary>
         public Point? LeftEye { get; init; }
+
+        /// <summary>
+        /// Feature position (as a percentage).
+        /// </summary>
         public Point? RightEye { get; init; }
+
+        /// <summary>
+        /// Feature position (as a percentage).
+        /// </summary>
         public Point? MouthCenter { get; init; }
+
+        /// <summary>
+        /// Feature size (as a percentage).
+        /// </summary>
         public double FaceWidth { get; init; }
+
+        /// <summary>
+        /// Feature size (as a percentage).
+        /// </summary>
         public double FaceHeight { get; init; }
 
         public override string ToString() =>
