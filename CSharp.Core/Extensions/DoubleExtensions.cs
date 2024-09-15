@@ -15,4 +15,7 @@ public static class DoubleExtensions
 {
     public static double Clamp(this double f, double min, double max) =>
         Math.Max(min, Math.Min(max, f));
+
+    public static double Lerp(this double f, double from, double to) =>
+        from * (1.0 - f) + to * f;
 }

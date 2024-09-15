@@ -19,6 +19,10 @@ public class Animation
     private readonly TimeSpan m_duration;
     private readonly TimeSpan m_delay;
 
+    public Animation(TimeSpan duration, Func<double, bool> callback) : this(TimeSpan.Zero, duration, callback)
+    {
+    }
+    
     public Animation(TimeSpan delay, TimeSpan duration, Func<double, bool> callback)
     {
         m_duration = duration;
