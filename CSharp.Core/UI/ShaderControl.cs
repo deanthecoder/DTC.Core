@@ -265,8 +265,9 @@ public class ShaderControl : UserControl
 
         public ShaderVisualHandler(Dictionary<string, Func<float[]>> uniforms)
         {
+            var startTime = (float)Environment.TickCount;
             m_customUniforms = uniforms;
-            m_customUniforms["iTime"] = () => new[] { (float)CompositionNow.TotalSeconds };
+            m_customUniforms["iTime"] = () => new[] { (Environment.TickCount - startTime) / 1000.0f };
         }
 
         /// <summary>
