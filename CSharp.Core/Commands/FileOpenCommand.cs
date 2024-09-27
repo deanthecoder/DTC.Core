@@ -38,6 +38,7 @@ public class FileOpenCommand : CommandBase
         if (mainWindow == null)
             return; // Cannot find the main application window.
 
+        // ReSharper disable once PossibleNullReferenceException
         var files =
             await TopLevel
                 .GetTopLevel(mainWindow)

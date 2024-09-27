@@ -15,6 +15,7 @@ namespace CSharp.Core.UnitTesting;
 
 public abstract class TestsBase
 {
+    // ReSharper disable once InconsistentNaming
     private static DirectoryInfo m_projectDir;
     
     protected static DirectoryInfo ProjectDir

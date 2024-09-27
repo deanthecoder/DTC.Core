@@ -45,6 +45,7 @@ public class FileSaveCommand : CommandBase
         if (mainWindow == null)
             return; // Cannot find the main application window.
 
+        // ReSharper disable once PossibleNullReferenceException
         var selectedFile =
             await TopLevel
                 .GetTopLevel(mainWindow)
