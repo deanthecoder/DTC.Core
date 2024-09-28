@@ -72,7 +72,8 @@ public class LruCache<TKey, TValue>
 #if DEBUG
             Console.WriteLine($"Cache full: {typeof(TKey)}, {typeof(TValue)}");
 #endif
-            RemoveLast();
+            while (m_cacheMap.Count >= m_capacity * 3 / 4)
+                RemoveLast();
         }
         
         // Add the new cache item.

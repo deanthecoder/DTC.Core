@@ -33,4 +33,12 @@ public static class BrushExtensions
         var b = (byte)(rgb.B * f).Clamp(0.0, 255.0);
         return Color.Parse($"#{r:X2}{g:X2}{b:X2}");
     }
+
+    public static Rgb SetBrightness(this Rgb rgb, double f)
+    {
+        var r = (byte)(rgb.R * f).Clamp(0.0, 255.0);
+        var g = (byte)(rgb.G * f).Clamp(0.0, 255.0);
+        var b = (byte)(rgb.B * f).Clamp(0.0, 255.0);
+        return new Rgb(r, g, b);
+    }
 }
