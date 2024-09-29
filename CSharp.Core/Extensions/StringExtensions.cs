@@ -21,6 +21,12 @@ public static class StringExtensions
         });
         return badChars.Aggregate(s, (current, nameChar) => current.Replace(nameChar, '_'));
     }
+    
+    /// <summary>
+    /// Add quotes to a file name string, if required.
+    /// </summary>
+    public static string AsFileName(this string s) =>
+        string.IsNullOrEmpty(s) || !s.Contains(' ') ? s : $"\"{s.Trim('"')}\"";
 
     public static IEnumerable<string> ReadAllLines(this string s)
     {
