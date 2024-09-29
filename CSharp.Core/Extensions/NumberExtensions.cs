@@ -11,8 +11,11 @@
 
 namespace CSharp.Core.Extensions;
 
-public static class DoubleExtensions
+public static class NumberExtensions
 {
+    public static int Clamp(this int f, int min, int max) =>
+        Math.Max(min, Math.Min(max, f));
+    
     public static double Clamp(this double f, double min, double max) =>
         Math.Max(min, Math.Min(max, f));
 
