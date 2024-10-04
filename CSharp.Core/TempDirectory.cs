@@ -19,7 +19,7 @@ public class TempDirectory : IDisposable
     
     public TempDirectory()
     {
-        m_tempObj = new DirectoryInfo(Path.GetTempPath()).GetDir(Guid.NewGuid().ToString("N"));
+        m_tempObj = Path.GetTempPath().ToDir().GetDir(Guid.NewGuid().ToString("N"));
         m_tempObj.Create();
     }
 

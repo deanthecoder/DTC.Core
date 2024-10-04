@@ -19,5 +19,5 @@ public static class StorageItemExtensions
         storageFile != null ? new FileInfo(storageFile.Path.LocalPath) : null;
 
     public static DirectoryInfo ToDirectoryInfo(this IStorageFolder storageFolder) =>
-        storageFolder != null ? new DirectoryInfo(storageFolder.Path.LocalPath) : null;
+        storageFolder?.Path.LocalPath.ToDir();
 }

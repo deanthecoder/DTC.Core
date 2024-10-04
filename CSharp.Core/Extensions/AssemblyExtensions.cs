@@ -41,6 +41,6 @@ public static class AssemblyExtensions
             appDataPath = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? Path.Combine(homePath, "Library", "Preferences") : homePath;
         }
 
-        return new DirectoryInfo(appDataPath).CreateSubdirectory(assembly.GetProductName().ToSafeFileName());
+        return appDataPath.ToDir().CreateSubdirectory(assembly.GetProductName().ToSafeFileName());
     }
 }

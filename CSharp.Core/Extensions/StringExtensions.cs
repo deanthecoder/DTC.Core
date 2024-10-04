@@ -34,4 +34,7 @@ public static class StringExtensions
         while (reader.ReadLine() is { } line)
             yield return line;
     }
+
+    public static DirectoryInfo ToDir(this string s) => new DirectoryInfo(s);
+    public static FileInfo ToFile(this string s) => new FileInfo(s);
 }

@@ -19,7 +19,7 @@ public class TempFile : IDisposable
     
     public TempFile(string ext = ".tmp")
     {
-        m_tempObj = new DirectoryInfo(Path.GetTempPath()).GetFile($"{Guid.NewGuid():N}{ext}");
+        m_tempObj = Path.GetTempPath().ToDir().GetFile($"{Guid.NewGuid():N}{ext}");
     }
 
     public static implicit operator FileInfo(TempFile tempFile) =>
