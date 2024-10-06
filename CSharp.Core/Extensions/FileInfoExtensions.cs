@@ -68,9 +68,27 @@ public static class FileInfoExtensions
     /// </summary>
     public static void Explore(this FileInfo info)
     {
+        if (info?.Exists() != true)
+            return;
+        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             Process.Start("explorer.exe", $"/select,\"{info.FullName}\"");
         else
             Process.Start("open", $"-R \"{info.FullName}\"");
+    }
+
+    public static bool IsExecutable(this FileInfo info)
+    {
+        if (info?.Exists() != true)
+            return false;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var extension = info.Extension.ToLowerInvariant();
+            return extension is ".exe" or ".com" or ".msi" or ".bat";
+        }
+        
+        // On macOS or Linux, check if the file has execute permissions.
+        return (info.UnixFileMode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
     }
 }
