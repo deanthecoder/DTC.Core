@@ -9,6 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
 namespace CSharp.Core.Extensions;
 
 public static class FileInfoExtensions
@@ -58,5 +61,16 @@ public static class FileInfoExtensions
         }
 
         return !File.Exists(file.FullName);
+    }
+
+    /// <summary>
+    /// Opens the OS's file explorer and selects the specified file.
+    /// </summary>
+    public static void Explore(this FileInfo info)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Process.Start("explorer.exe", $"/select,\"{info.FullName}\"");
+        else
+            Process.Start("open", $"-R \"{info.FullName}\"");
     }
 }

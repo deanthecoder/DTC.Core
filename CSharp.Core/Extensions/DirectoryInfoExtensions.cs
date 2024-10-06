@@ -9,6 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
 namespace CSharp.Core.Extensions;
 
 public static class DirectoryInfoExtensions
@@ -31,5 +34,14 @@ public static class DirectoryInfoExtensions
         }
 
         return !info.Exists();
+    }
+
+    /// <summary>
+    /// Opens the directory in the OS's file explorer.
+    /// </summary>
+    public static void Explore(this DirectoryInfo directoryInfo)
+    {
+        var toOpen = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "explorer.exe" : "open";
+        Process.Start(toOpen, directoryInfo.FullName);
     }
 }
