@@ -9,6 +9,8 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.Text.RegularExpressions;
+
 namespace CSharp.Core.Extensions;
 
 public static class StringExtensions
@@ -37,4 +39,12 @@ public static class StringExtensions
 
     public static DirectoryInfo ToDir(this string s) => new DirectoryInfo(s);
     public static FileInfo ToFile(this string s) => new FileInfo(s);
+
+    private static readonly Regex CmdParsingRegex = new Regex(@"[\""].+?[\""]|[^ ]+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Parse a command string into an array of arguments by splitting based on spaces and preserving quoted segments.
+    /// </summary>
+    public static string[] ToArgumentArray(this string command) =>
+        CmdParsingRegex.Matches(command).Select(o => o.Value.Trim('"')).ToArray();
 }
