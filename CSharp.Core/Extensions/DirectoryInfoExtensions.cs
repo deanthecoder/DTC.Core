@@ -44,4 +44,7 @@ public static class DirectoryInfoExtensions
         var toOpen = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "explorer.exe" : "open";
         Process.Start(toOpen, directoryInfo.FullName);
     }
+
+    public static DirectoryInfo Clone(this DirectoryInfo info) =>
+        info == null ? null : new DirectoryInfo(info.FullName);
 }

@@ -91,4 +91,7 @@ public static class FileInfoExtensions
         // On macOS or Linux, check if the file has execute permissions.
         return (info.UnixFileMode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
     }
+
+    public static FileInfo Clone(this FileInfo info) =>
+        info == null ? null : new FileInfo(info.FullName);
 }
