@@ -47,4 +47,7 @@ public static class StringExtensions
     /// </summary>
     public static string[] ToArgumentArray(this string command) =>
         CmdParsingRegex.Matches(command).Select(o => o.Value.Trim('"')).ToArray();
+
+    public static string StringOrDefault(this string s, string fallback) =>
+        string.IsNullOrEmpty(s) ? fallback : s;
 }
