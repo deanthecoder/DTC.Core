@@ -16,6 +16,7 @@ using CSharp.Core.Extensions;
 using CSharp.Core.JsonConverters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 namespace CSharp.Core.Settings;
 
@@ -41,11 +42,22 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
     {
         if (!m_state.TryGetValue(key ?? throw new ArgumentNullException(nameof(key)), out var value))
             value = default(T);
-        if (typeof(T) == typeof(FileInfo) && value is string s)
+        if (typeof(T) == typeof(FileInfo))
         {
-            value = new FileInfo(s);
-            m_state[key] = value;
-        }
+            if (value is string s)
+            {
+                value = new FileInfo(s);
+                m_state[key] = value;
+            }
+        } else if (typeof(T) == typeof(DirectoryInfo))
+        {
+            if (value is string s)
+            {
+                value = new DirectoryInfo(s);
+                m_state[key] = value;
+            }
+        } else if (value is JToken token)
+            value = token.ToObject<T>();
         
         return (T)value;
     }
@@ -74,6 +86,7 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
             Converters = new JsonConverter[]
             {
                 new FileInfoConverter(),
+                new DirectoryInfoConverter(),
                 new StringEnumConverter()
             }
         };
