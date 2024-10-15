@@ -54,14 +54,10 @@ public static class WindowExtensions
             if (screenIndex < 0 || screenIndex >= screens.Length)
                 return; // Monitors must have changed...
             
-            var savedScreen = screens[screenIndex];
             var windowPosition = new PixelPoint(x, y);
-            if (savedScreen.Bounds.Contains(windowPosition))
-            {
-                window.Position = windowPosition;
-                window.Width = width;
-                window.Height = height;
-            }
+            window.Position = windowPosition;
+            window.Width = width;
+            window.Height = height;
         }
     }
 }
