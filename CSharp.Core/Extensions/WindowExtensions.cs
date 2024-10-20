@@ -63,6 +63,7 @@ public static class WindowExtensions
             
             // Restore the window state
             window.WindowState = (WindowState)state;
+            window.SystemDecorations = window.WindowState == WindowState.FullScreen ? SystemDecorations.None : SystemDecorations.Full;
         }
     }
 }
