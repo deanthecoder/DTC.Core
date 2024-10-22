@@ -36,6 +36,21 @@ public static class DirectoryInfoExtensions
         return !info.Exists();
     }
 
+    public static FileSystemInfo[] TryGetContent(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+    {
+        try
+        {
+            if (info?.Exists() == true)
+                return info.GetFileSystemInfos(searchPattern, searchOption);
+        }
+        catch
+        {
+            // This is ok.
+        }
+
+        return [];
+    }
+
     /// <summary>
     /// Opens the directory in the OS's file explorer.
     /// </summary>
