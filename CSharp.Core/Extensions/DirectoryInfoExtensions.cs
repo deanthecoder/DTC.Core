@@ -89,7 +89,10 @@ public static class DirectoryInfoExtensions
         if (starIndex >= 0)
         {
             result = Path.GetFullPath(Path.Combine(info.FullName, morePath.Substring(0, starIndex)));
-            result = Path.Combine(result, morePath.Substring(starIndex));
+            if (Directory.Exists(result))
+                result = Path.Combine(result, morePath.Substring(starIndex));
+            else
+                result += morePath.Substring(starIndex);
         }
         else
         {
