@@ -22,6 +22,12 @@ public static class DirectoryInfoExtensions
     public static DirectoryInfo GetDir(this DirectoryInfo info, string name) =>
         new DirectoryInfo(Path.Combine(info.FullName, name));
 
+    /// <summary>
+    /// Attempts to recursively delete the specified directory.
+    /// </summary>
+    /// <remarks>
+    /// If an error occurs during deletion, it is caught and ignored without throwing an exception.
+    /// </remarks>
     public static bool TryDelete(this DirectoryInfo info)
     {
         try
