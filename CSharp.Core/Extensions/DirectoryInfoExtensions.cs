@@ -107,4 +107,33 @@ public static class DirectoryInfoExtensions
         
         return result;
     }
+
+    /// <summary>
+    /// Copies the contents of the current directory to the target directory recursively.
+    /// </summary>
+    /// <param name="source">The source directory to copy from.</param>
+    /// <param name="target">The target directory to copy to.</param>
+    /// <param name="fastCopy">Optional. Set to true to perform a fast copy (skipping if target files already exist in the correct state).</param>
+    public static void CopyTo(this DirectoryInfo source, DirectoryInfo target, bool fastCopy = false)
+    {
+        // Ensure source directory exists
+        if (!source.Exists())
+            return; // Nothing to do.
+
+        // Create the target directory with the same name as the source
+        var targetSubDir = target.GetDir(source.Name);
+        if (!targetSubDir.Exists)
+            targetSubDir.Create();
+
+        // Copy all files from the source to the target
+        foreach (var file in source.GetFiles())
+        {
+            var targetFilePath = targetSubDir.GetFile(file.Name);
+            file.CopyTo(targetFilePath, fastCopy);
+        }
+
+        // Recursively copy subdirectories
+        foreach (var subDir in source.GetDirectories())
+            subDir.CopyTo(targetSubDir);
+    }
 }

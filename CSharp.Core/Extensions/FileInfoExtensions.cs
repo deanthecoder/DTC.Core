@@ -94,4 +94,48 @@ public static class FileInfoExtensions
 
     public static FileInfo Clone(this FileInfo info) =>
         info == null ? null : new FileInfo(info.FullName);
+
+    /// <summary>
+    /// Copies the source FileInfo to the specified destination.
+    /// </summary>
+    /// <remarks>
+    /// If the destination file exists (with the correct content) and fastCopy is enabled, the operation is skipped.
+    /// </remarks>
+    public static void CopyTo(this FileInfo source, FileInfo dest, bool fastCopy = false)
+    {
+        if (!source.Exists())
+            return; // Nothing to do.
+        if (!dest.Exists || (fastCopy && !source.AreFilesEqual(dest)))
+            source.CopyTo(dest.FullName, overwrite: true);
+    }
+    
+    /// <summary>
+    /// Copies the source FileInfo to the specified destination.
+    /// </summary>
+    /// <remarks>
+    /// If the destination file exists (with the correct content) and fastCopy is enabled, the operation is skipped.
+    /// </remarks>
+    public static void CopyTo(this FileInfo source, DirectoryInfo dest, bool fastCopy = false)
+    {
+        if (!source.Exists())
+            return; // Nothing to do.
+        if (!dest.Exists())
+            dest.Create();
+
+        source.CopyTo(dest.GetFile(source.Name), fastCopy);
+    }
+    
+    public static void CopyTo(this FileSystemInfo source, DirectoryInfo dest, bool fastCopy = false)
+    {
+        if (source is FileInfo fileInfo)
+            fileInfo.CopyTo(dest, fastCopy);
+        else if (source is DirectoryInfo directoryInfo)
+            directoryInfo.CopyTo(dest, fastCopy);
+    }
+
+    /// <summary>
+    /// Checks if two files are equal by comparing their length and last write time.
+    /// </summary>
+    public static bool AreFilesEqual(this FileInfo source, FileInfo dest) =>
+        source.Length == dest.Length && source.LastWriteTime == dest.LastWriteTime;
 }
