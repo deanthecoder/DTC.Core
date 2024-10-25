@@ -53,7 +53,8 @@ public static class FileInfoExtensions
     {
         try
         {
-            file.Delete();
+            if (file.Exists())
+                file.Delete();
         }
         catch
         {
@@ -125,14 +126,6 @@ public static class FileInfoExtensions
         source.CopyTo(dest.GetFile(source.Name), fastCopy);
     }
     
-    public static void CopyTo(this FileSystemInfo source, DirectoryInfo dest, bool fastCopy = false)
-    {
-        if (source is FileInfo fileInfo)
-            fileInfo.CopyTo(dest, fastCopy);
-        else if (source is DirectoryInfo directoryInfo)
-            directoryInfo.CopyTo(dest, fastCopy);
-    }
-
     /// <summary>
     /// Checks if two files are equal by comparing their length and last write time.
     /// </summary>

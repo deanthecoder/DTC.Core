@@ -32,7 +32,8 @@ public static class DirectoryInfoExtensions
     {
         try
         {
-            info.Delete(true);
+            if (info.Exists())
+                info.Delete(true);
         }
         catch
         {
