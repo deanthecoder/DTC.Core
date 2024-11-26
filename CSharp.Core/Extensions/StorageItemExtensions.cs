@@ -16,7 +16,7 @@ namespace CSharp.Core.Extensions;
 public static class StorageItemExtensions
 {
     public static FileInfo ToFileInfo(this IStorageFile storageFile) =>
-        storageFile != null ? new FileInfo(storageFile.Path.LocalPath) : null;
+        storageFile?.Path.LocalPath.ToFile();
 
     public static DirectoryInfo ToDirectoryInfo(this IStorageFolder storageFolder) =>
         storageFolder?.Path.LocalPath.ToDir();
