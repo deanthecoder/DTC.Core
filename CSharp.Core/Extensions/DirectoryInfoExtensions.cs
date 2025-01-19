@@ -75,38 +75,113 @@ public static class DirectoryInfoExtensions
     /// </summary>
     public static string Resolve(this DirectoryInfo info, string morePath)
     {
-        if (string.IsNullOrEmpty(morePath))
-            return info.FullName;
-        
-        if (morePath.StartsWith('~'))
+        info.Resolve(morePath, out var dir, out var fileName, out var wildcard);
+
+        var result = dir.FullName;
+        if (!string.IsNullOrEmpty(fileName))
+            result = Path.Combine(result, fileName);
+        if (!string.IsNullOrEmpty(wildcard))
+            result = Path.Combine(result, wildcard);
+        return result;
+    }
+
+    /// <summary>
+    /// Resolves a relative path within the current working directory to an absolute directory path, file name, and wildcard pattern.
+    /// </summary>
+    /// <param name="cwd">The current working directory.</param>
+    /// <param name="relative">The relative path to resolve.</param>
+    /// <param name="dir">The resolved absolute directory path.</param>
+    /// <param name="fileName">The file name extracted from the path, if any.</param>
+    /// <param name="wildcard">The wildcard pattern extracted from the path, if any.</param>
+    public static void Resolve(this DirectoryInfo cwd, string relative, out DirectoryInfo dir, out string fileName, out string wildcard)
+    {
+        dir = new DirectoryInfo(cwd.FullName);
+
+        if (relative.Length >= 3 && relative[1..3] == ":\\")
         {
-            info = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile).ToDir();
-            morePath = morePath[1..].TrimStart('\\', '/');
+            // Windows drive specified. Set the cwd to the drive root.
+            dir = new DirectoryInfo(relative[..3]);
+            relative = relative[2..];
         }
 
-        while (morePath.StartsWith("..") && info.Parent != null)
+        if (string.IsNullOrEmpty(relative))
         {
-            info = info.Parent;
-            morePath = morePath[2..].TrimStart('\\', '/');
+            fileName = null;
+            wildcard = null;
+            return;
         }
         
-        // Remove any file filter.
-        string result;
-        var starIndex = morePath.IndexOf('*');
-        if (starIndex >= 0)
+        if (relative.IndexOfAny(['/', '\\']) == 0)
         {
-            result = Path.GetFullPath(Path.Combine(info.FullName, morePath.Substring(0, starIndex)));
-            if (Directory.Exists(result))
-                result = Path.Combine(result, morePath.Substring(starIndex));
-            else
-                result += morePath.Substring(starIndex);
+            // Path is absolute.
+            while (dir.Parent != null)
+                dir = dir.Parent;
         }
-        else
+
+        var parts = relative.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < parts.Length; i++)
         {
-            result = Path.GetFullPath(Path.Combine(info.FullName, morePath));
+            var part = parts[i];
+            if (part.IndexOfAny(['*', '?']) >= 0)
+            {
+                // We have a wildcard - Stop.
+                wildcard = part;
+                fileName = null;
+                return;
+            }
+
+            if (part == "~")
+            {
+                // User's 'home' folder.
+                dir = dir.GetDir(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                continue;
+            }
+
+            if (part == "..")
+            {
+                // Navigate to parent.
+                if (dir != null)
+                    dir = dir.Parent;
+                continue;
+            }
+
+            if (part == ".")
+            {
+                // Do nothing.
+                continue;
+            }
+
+            // File or folder name containing a '.'
+            if (part.Contains('.') && part.IndexOf('.') > 0)
+            {
+                if (i == parts.Length - 1)
+                {
+                    // This is the last section of the path.
+                    // Check if it's a directory...
+                    if (dir.GetDir(part).Exists())
+                    {
+                        // We know it's a directory containing a '.'
+                        dir = dir.GetDir(part);
+                        fileName = null;
+                        wildcard = null;
+                        return;
+                    }
+                    
+                    // Can't be sure it's a directory, so assume a file.
+                    fileName = part;
+                    wildcard = null;
+                    return;
+                }
+                
+                // There's more path sections to come, so this must be a folder name with a '.'
+            }
+
+            // Normal folder name.
+            dir = dir.GetDir(part);
         }
-        
-        return result;
+
+        fileName = null;
+        wildcard = null;
     }
 
     /// <summary>
