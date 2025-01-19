@@ -23,10 +23,10 @@ public static class BrushExtensions
         return (Color)color;
     }
 
-    public static IBrush SetBrightness(this IBrush brush, double f) =>
-        new SolidColorBrush(brush.GetColor().SetBrightness(f));
+    public static IBrush WithBrightness(this IBrush brush, double f) =>
+        new SolidColorBrush(brush.GetColor().WithBrightness(f));
 
-    public static Color SetBrightness(this Color rgb, double f)
+    public static Color WithBrightness(this Color rgb, double f)
     {
         var r = (byte)(rgb.R * f).Clamp(0.0, 255.0);
         var g = (byte)(rgb.G * f).Clamp(0.0, 255.0);
@@ -34,7 +34,7 @@ public static class BrushExtensions
         return Color.Parse($"#{r:X2}{g:X2}{b:X2}");
     }
 
-    public static Rgb SetBrightness(this Rgb rgb, double f)
+    public static Rgb WithBrightness(this Rgb rgb, double f)
     {
         var r = (byte)(rgb.R * f).Clamp(0.0, 255.0);
         var g = (byte)(rgb.G * f).Clamp(0.0, 255.0);

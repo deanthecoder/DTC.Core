@@ -21,4 +21,12 @@ public static class NumberExtensions
 
     public static double Lerp(this double f, double from, double to) =>
         from * (1.0 - f) + to * f;
+    
+    public static Rgb Lerp(this double f, Rgb from, Rgb to)
+    {
+        var r = f.Lerp(from.R, to.R);
+        var g = f.Lerp(from.G, to.G);
+        var b = f.Lerp(from.B, to.B);
+        return new Rgb((byte)r.Clamp(0, 255), (byte)g.Clamp(0, 255), (byte)b.Clamp(0, 255));
+    }
 }
