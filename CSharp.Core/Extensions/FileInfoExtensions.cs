@@ -102,12 +102,15 @@ public static class FileInfoExtensions
     /// <remarks>
     /// If the destination file exists (with the correct content) and fastCopy is enabled, the operation is skipped.
     /// </remarks>
-    public static void CopyTo(this FileInfo source, FileInfo dest, bool fastCopy = false)
+    /// <returns>true if the file was copied.</returns>
+    public static bool CopyTo(this FileInfo source, FileInfo dest, bool fastCopy = false)
     {
         if (!source.Exists())
-            return; // Nothing to do.
-        if (!dest.Exists || (fastCopy && !source.AreFilesEqual(dest)))
-            source.CopyTo(dest.FullName, overwrite: true);
+            return false; // Nothing to copy.
+        if (dest.Exists && fastCopy && source.AreFilesEqual(dest))
+            return false; // No need to copy.
+        source.CopyTo(dest.FullName, overwrite: true);
+        return true;
     }
     
     /// <summary>
@@ -116,14 +119,14 @@ public static class FileInfoExtensions
     /// <remarks>
     /// If the destination file exists (with the correct content) and fastCopy is enabled, the operation is skipped.
     /// </remarks>
-    public static void CopyTo(this FileInfo source, DirectoryInfo dest, bool fastCopy = false)
+    /// <returns>true if the file was copied.</returns>
+    public static bool CopyTo(this FileInfo source, DirectoryInfo dest, bool fastCopy = false)
     {
         if (!source.Exists())
-            return; // Nothing to do.
+            return false; // Nothing to copy.
         if (!dest.Exists())
             dest.Create();
-
-        source.CopyTo(dest.GetFile(source.Name), fastCopy);
+        return source.CopyTo(dest.GetFile(source.Name), fastCopy);
     }
     
     /// <summary>

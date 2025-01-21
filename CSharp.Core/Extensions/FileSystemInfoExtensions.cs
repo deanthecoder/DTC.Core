@@ -20,11 +20,17 @@ public static class FileSystemInfoExtensions
             directoryInfo.TryDelete();
     }
     
-    public static void CopyTo(this FileSystemInfo source, DirectoryInfo dest, bool fastCopy = false)
+    /// <summary>
+    /// Copy the source object to the target folder.
+    /// </summary>
+    /// <returns>The number of files copied.</returns>
+    public static int CopyTo(this FileSystemInfo source, DirectoryInfo dest, bool fastCopy = false)
     {
         if (source is FileInfo fileInfo)
-            fileInfo.CopyTo(dest, fastCopy);
-        else if (source is DirectoryInfo directoryInfo)
-            directoryInfo.CopyTo(dest, fastCopy);
+            return fileInfo.CopyTo(dest, fastCopy) ? 1 : 0;
+        if (source is DirectoryInfo directoryInfo)
+            return directoryInfo.CopyTo(dest, fastCopy);
+
+        throw new ArgumentException($"Unsupported file type: {source}");
     }
 }
