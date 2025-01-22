@@ -29,4 +29,11 @@ public static class NumberExtensions
         var b = f.Lerp(from.B, to.B);
         return new Rgb((byte)r.Clamp(0, 255), (byte)g.Clamp(0, 255), (byte)b.Clamp(0, 255));
     }
+
+    public static char ToAscii(this double f)
+    {
+        const string gradient = " .,;ilS8$@";
+        var index = (int)Math.Round(f.Clamp(0.0, 1.0) * (gradient.Length - 1));
+        return gradient[index];
+    }
 }
