@@ -58,6 +58,54 @@ public static class DirectoryInfoExtensions
         return [];
     }
 
+    public static async IAsyncEnumerable<FileSystemInfo> TryGetContentAsync(
+        this DirectoryInfo info,
+        string fileSearchPattern = "*",
+        SearchOption searchOption = SearchOption.TopDirectoryOnly,
+        Func<bool> isCancelRequested = null)
+    {
+        if (isCancelRequested?.Invoke() ?? false)
+            yield break;
+
+        // Skip if the directory is a symlink or doesn't exist.
+        if (info?.Exists() != true || info.IsSymbolicLink())
+            yield break;
+
+        // Offload file enumeration to a background thread
+        FileSystemInfo[] entries;
+        try
+        {
+            entries = await Task.Run(() => info.GetFileSystemInfos(fileSearchPattern));
+        }
+        catch
+        {
+            yield break; // Skip directories we cannot access
+        }
+
+        foreach (var entry in entries)
+            yield return entry;
+
+        if (searchOption == SearchOption.TopDirectoryOnly)
+            yield break;
+
+        // Recursively process subdirectories
+        IEnumerable<DirectoryInfo> subDirectories;
+        try
+        {
+            subDirectories = info.GetDirectories().Where(o => !o.IsSymbolicLink()).ToArray();
+        }
+        catch
+        {
+            yield break; // Skip inaccessible directories
+        }
+
+        foreach (var subDirectory in subDirectories)
+        {
+            await foreach (var subEntry in subDirectory.TryGetContentAsync(fileSearchPattern, searchOption, isCancelRequested))
+                yield return subEntry;
+        }
+    }
+    
     /// <summary>
     /// Opens the directory in the OS's file explorer.
     /// </summary>
@@ -215,5 +263,22 @@ public static class DirectoryInfoExtensions
             filesCopied += subDir.CopyTo(targetSubDir, fastCopy);
 
         return filesCopied;
+    }
+
+
+    /// <summary>
+    /// Determines if the given directory is a symbolic link.
+    /// </summary>
+    public static bool IsSymbolicLink(this DirectoryInfo directory)
+    {
+        try
+        {
+            return (directory.Attributes & FileAttributes.ReparsePoint) != 0;
+        }
+        catch
+        {
+            // If we can't access attributes, assume it's not a symlink.
+            return false;
+        }
     }
 }
