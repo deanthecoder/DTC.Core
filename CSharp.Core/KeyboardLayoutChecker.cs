@@ -19,7 +19,7 @@ public static class KeyboardLayoutChecker
     [DllImport("user32.dll")]
     private static extern IntPtr GetKeyboardLayout(uint idThread);
 
-    public static bool IsUkKeyboardLayout()
+    public static bool IsUk()
     {
         if (m_cachedResult != null)
             return m_cachedResult.Value;
