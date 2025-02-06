@@ -36,4 +36,21 @@ public static class NumberExtensions
         var index = (int)Math.Round(f.Clamp(0.0, 1.0) * (gradient.Length - 1));
         return gradient[index];
     }
+
+    /// <summary>
+    /// Convert a byte count to human-readable string.
+    /// </summary>
+    public static string ToSize(this long bytes)
+    {
+        if (bytes < 4096)
+            return $"{bytes:N0} bytes";
+        string[] sizes =
+        [
+            "bytes", "KB", "MB", "GB", "TB"
+        ];
+
+        var order = (int)Math.Log(bytes, 1024);
+        var formattedValue = bytes / Math.Pow(1024, order);
+        return $"{formattedValue:N2} {sizes[order]}";
+    }
 }
