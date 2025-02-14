@@ -20,7 +20,7 @@ public static class AssemblyExtensions
         assembly.GetName().Name;
 
     public static DirectoryInfo GetDirectory(this Assembly assembly) =>
-        new FileInfo(assembly.Location).Directory;
+        assembly.Location.ToFile().Directory;
 
     /// <summary>
     /// Return a directory suitable for storing user-specific application settings.

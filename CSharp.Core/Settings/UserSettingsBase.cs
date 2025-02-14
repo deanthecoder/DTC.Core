@@ -46,14 +46,14 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
         {
             if (value is string s)
             {
-                value = new FileInfo(s);
+                value = s.ToFile();
                 m_state[key] = value;
             }
         } else if (typeof(T) == typeof(DirectoryInfo))
         {
             if (value is string s)
             {
-                value = new DirectoryInfo(s);
+                value = s.ToDir();
                 m_state[key] = value;
             }
         } else if (value is JToken token)

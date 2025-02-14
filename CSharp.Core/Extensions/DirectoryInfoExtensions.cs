@@ -17,10 +17,10 @@ namespace CSharp.Core.Extensions;
 public static class DirectoryInfoExtensions
 {
     public static FileInfo GetFile(this DirectoryInfo info, string name) =>
-        new FileInfo(Path.Combine(info.FullName, name));
+        Path.Combine(info.FullName, name).ToFile();
 
     public static DirectoryInfo GetDir(this DirectoryInfo info, string name) =>
-        new DirectoryInfo(Path.Combine(info.FullName, name));
+        Path.Combine(info.FullName, name).ToDir();
 
     /// <summary>
     /// Attempts to recursively delete the specified directory.
@@ -116,7 +116,7 @@ public static class DirectoryInfoExtensions
     }
 
     public static DirectoryInfo Clone(this DirectoryInfo info) =>
-        info == null ? null : new DirectoryInfo(info.FullName);
+        info?.FullName.ToDir();
 
     /// <summary>
     /// Resolves a path relative to the current DirectoryInfo (and maybe including file wildcard).
@@ -143,12 +143,12 @@ public static class DirectoryInfoExtensions
     /// <param name="wildcard">The wildcard pattern extracted from the path, if any.</param>
     public static void Resolve(this DirectoryInfo cwd, string relative, out DirectoryInfo dir, out string fileName, out string wildcard)
     {
-        dir = new DirectoryInfo(cwd.FullName);
+        dir = cwd.Clone();
 
         if (relative.Length >= 3 && relative[1..3] == ":\\")
         {
             // Windows drive specified. Set the cwd to the drive root.
-            dir = new DirectoryInfo(relative[..3]);
+            dir = relative[..3].ToDir();
             relative = relative[2..];
         }
 

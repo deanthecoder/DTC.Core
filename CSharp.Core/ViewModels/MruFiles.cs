@@ -110,7 +110,7 @@ public class MruFiles : ViewModelBase
         [JsonProperty]
         public string FullName { get; set; }
 
-        public FileInfo File => FullName != null ? new FileInfo(FullName) : null;
+        public FileInfo File => FullName?.ToFile();
 
         public static SingleItem Empty { get; } = new SingleItem(null);
 

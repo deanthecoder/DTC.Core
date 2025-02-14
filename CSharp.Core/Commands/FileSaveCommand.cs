@@ -66,7 +66,7 @@ public class FileSaveCommand : CommandBase
                                          }
                                      });
         if (selectedFile != null)
-            FileSelected?.Invoke(this, new FileInfo(selectedFile.Path.LocalPath));
+            FileSelected?.Invoke(this, selectedFile.Path.LocalPath.ToFile());
         else
             Cancelled?.Invoke(this, null);
     }

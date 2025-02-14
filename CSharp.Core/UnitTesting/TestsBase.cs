@@ -10,6 +10,7 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System.Reflection;
+using CSharp.Core.Extensions;
 
 namespace CSharp.Core.UnitTesting;
 
@@ -25,7 +26,7 @@ public abstract class TestsBase
             if (m_projectDir == null)
             {
                 var location = Assembly.GetExecutingAssembly().Location;
-                m_projectDir = new FileInfo(location).Directory;
+                m_projectDir = location.ToFile().Directory;
                 while (m_projectDir?.EnumerateFiles("*.csproj").Any() != true && m_projectDir?.Parent != null)
                     m_projectDir = m_projectDir.Parent;
             }

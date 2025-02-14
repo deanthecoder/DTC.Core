@@ -9,6 +9,7 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using CSharp.Core.Extensions;
 using Newtonsoft.Json;
 
 namespace CSharp.Core.JsonConverters;
@@ -27,7 +28,7 @@ public class FileInfoConverter : JsonConverter
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         var path = serializer.Deserialize<string>(reader);
-        return new FileInfo(path);
+        return path?.ToFile();
     }
 
     public override bool CanRead => true;

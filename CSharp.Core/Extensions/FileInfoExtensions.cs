@@ -94,7 +94,7 @@ public static class FileInfoExtensions
     }
 
     public static FileInfo Clone(this FileInfo info) =>
-        info == null ? null : new FileInfo(info.FullName);
+        info?.FullName.ToFile();
 
     /// <summary>
     /// Copies the source FileInfo to the specified destination.

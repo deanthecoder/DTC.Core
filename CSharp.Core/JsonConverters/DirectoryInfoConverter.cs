@@ -8,6 +8,7 @@
 // about your modifications. Your contributions are valued!
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+using CSharp.Core.Extensions;
 using Newtonsoft.Json;
 
 namespace CSharp.Core.JsonConverters;
@@ -26,7 +27,7 @@ public class DirectoryInfoConverter : JsonConverter
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         var path = serializer.Deserialize<string>(reader);
-        return new DirectoryInfo(path);
+        return path?.ToDir();
     }
 
     public override bool CanRead => true;
