@@ -9,6 +9,8 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.Numerics;
+
 namespace CSharp.Core.Extensions;
 
 public static class NumberExtensions
@@ -22,6 +24,9 @@ public static class NumberExtensions
     public static double Lerp(this double f, double from, double to) =>
         from * (1.0 - f) + to * f;
     
+    public static float Lerp(this float f, float from, float to) =>
+        from * (1.0f - f) + to * f;
+
     public static Rgb Lerp(this double f, Rgb from, Rgb to)
     {
         var r = f.Lerp(from.R, to.R);
@@ -30,6 +35,26 @@ public static class NumberExtensions
         return new Rgb((byte)r.Clamp(0, 255), (byte)g.Clamp(0, 255), (byte)b.Clamp(0, 255));
     }
 
+    public static double InverseLerp(this double f, double from, double to)
+    {
+        if (Math.Abs(from - to) < 0.001)
+            return 0.0; // Avoid division by zero
+        return (f - from) / (to - from);
+    }
+
+    public static float InverseLerp(this float f, float from, float to)
+    {
+        if (Math.Abs(from - to) < 0.001f)
+            return 0.0f; // Avoid division by zero
+        return (f - from) / (to - from);
+    }
+
+    /// <summary>
+    /// Computes the cross product of two 2D vectors.
+    /// </summary>
+    public static float Cross(this Vector2 a, Vector2 b) =>
+        a.X * b.Y - a.Y * b.X;
+    
     public static char ToAscii(this double f)
     {
         const string gradient = " .,;ilS8$@";
