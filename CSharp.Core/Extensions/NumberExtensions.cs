@@ -10,16 +10,22 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System.Numerics;
+using DotnetNoise;
 
 namespace CSharp.Core.Extensions;
 
 public static class NumberExtensions
 {
+    private static readonly FastNoise Noise = new FastNoise();
+    
     public static int Clamp(this int f, int min, int max) =>
         Math.Max(min, Math.Min(max, f));
     
     public static double Clamp(this double f, double min, double max) =>
         Math.Max(min, Math.Min(max, f));
+
+    public static float Clamp(this float f, float min, float max) =>
+        MathF.Max(min, MathF.Min(max, f));
 
     public static double Lerp(this double f, double from, double to) =>
         from * (1.0 - f) + to * f;
@@ -50,10 +56,53 @@ public static class NumberExtensions
     }
 
     /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static double SmoothNoise(this (double X, double Y) f) =>
+        Noise.GetSimplex((float)f.X, (float)f.Y) * 0.5 + 0.5;
+
+    /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static float SmoothNoise(this (float X, float Y) f) =>
+        Noise.GetSimplex(f.X, f.Y) * 0.5f + 0.5f;
+
+    /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static double SmoothNoise(this double f) =>
+        SmoothNoise((f, 1.0));
+
+    /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static float SmoothNoise(this float f) =>
+        SmoothNoise((f, 1.0f));
+
+    /// <summary>
     /// Computes the cross product of two 2D vectors.
     /// </summary>
     public static float Cross(this Vector2 a, Vector2 b) =>
         a.X * b.Y - a.Y * b.X;
+
+    public static Vector3 Rotate(this Vector3 v, Vector3 r)
+    {
+        var cosX = MathF.Cos(r.X);
+        var sinX = MathF.Sin(r.X);
+        var cosY = MathF.Cos(r.Y);
+        var sinY = MathF.Sin(r.Y);
+        var cosZ = MathF.Cos(r.Z);
+        var sinZ = MathF.Sin(r.Z);
+
+        var y1 = v.Y * cosX - v.Z * sinX;
+        var z1 = v.Y * sinX + v.Z * cosX;
+        var x2 = v.X * cosY + z1 * sinY;
+        var z2 = -v.X * sinY + z1 * cosY;
+        var x3 = x2 * cosZ - y1 * sinZ;
+        var y3 = x2 * sinZ + y1 * cosZ;
+
+        return new Vector3(x3, y3, z2);
+    }
     
     public static char ToAscii(this double f)
     {
