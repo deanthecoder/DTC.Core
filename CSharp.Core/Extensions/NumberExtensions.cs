@@ -85,25 +85,25 @@ public static class NumberExtensions
     public static float Cross(this Vector2 a, Vector2 b) =>
         a.X * b.Y - a.Y * b.X;
 
-    public static Vector3 Rotate(this Vector3 v, Vector3 r)
-    {
-        var cosX = MathF.Cos(r.X);
-        var sinX = MathF.Sin(r.X);
-        var cosY = MathF.Cos(r.Y);
-        var sinY = MathF.Sin(r.Y);
-        var cosZ = MathF.Cos(r.Z);
-        var sinZ = MathF.Sin(r.Z);
+    // Rotate around Z-axis (XY plane)
+    public static Matrix4x4 RotateXy(this Matrix4x4 matrix, float angle) =>
+        Matrix4x4.CreateRotationZ(angle) * matrix;
 
-        var y1 = v.Y * cosX - v.Z * sinX;
-        var z1 = v.Y * sinX + v.Z * cosX;
-        var x2 = v.X * cosY + z1 * sinY;
-        var z2 = -v.X * sinY + z1 * cosY;
-        var x3 = x2 * cosZ - y1 * sinZ;
-        var y3 = x2 * sinZ + y1 * cosZ;
+    // Rotate around X-axis (YZ plane)
+    public static Matrix4x4 RotateYz(this Matrix4x4 matrix, float angle) =>
+        Matrix4x4.CreateRotationX(angle) * matrix;
 
-        return new Vector3(x3, y3, z2);
-    }
-    
+    // Rotate around Y-axis (XZ plane)
+    public static Matrix4x4 RotateXz(this Matrix4x4 matrix, float angle) =>
+        Matrix4x4.CreateRotationY(angle) * matrix;
+
+    // Translate (move in X, Y, Z)
+    public static Matrix4x4 Translate(this Matrix4x4 matrix, float x, float y, float z) =>
+        Matrix4x4.CreateTranslation(x, y, z) * matrix;
+
+    public static Matrix4x4 Scale(this Matrix4x4 matrix, float f) =>
+        Matrix4x4.CreateScale(f) * matrix;
+
     public static char ToAscii(this double f)
     {
         const string gradient = " .,;ilS8$@";

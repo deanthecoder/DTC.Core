@@ -14,6 +14,9 @@ namespace CSharp.Core;
 
 public record Rgb(byte R, byte G, byte B)
 {
+    public static Rgb Black { get; } = Colors.Black;
+    public static Rgb White { get; } = Colors.White;
+    
     public static implicit operator Rgb(Color color) => new Rgb(color.R, color.G, color.B);
     public static implicit operator Color(Rgb rgb) => Color.FromRgb(rgb.R, rgb.G, rgb.B);
 }
