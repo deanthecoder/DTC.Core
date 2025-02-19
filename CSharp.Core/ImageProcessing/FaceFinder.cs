@@ -11,6 +11,7 @@
 
 using System.Net.Http.Headers;
 using Avalonia;
+using CSharp.Core.Extensions;
 using Newtonsoft.Json.Linq;
 using SkiaSharp;
 
@@ -40,7 +41,7 @@ public class FaceFinder
         var requestUrl = $"{ApiUrl}?api_key={m_apiKey}&api_secret={m_apiSecret}";
 
         // Add the image file to the form data
-        using var fileStream = new FileStream(imageFile.FullName, FileMode.Open, FileAccess.Read);
+        await using var fileStream = new FileStream(imageFile.FullName, FileMode.Open, FileAccess.Read);
         using var fileContent = new StreamContent(fileStream);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
 
@@ -72,8 +73,8 @@ public class FaceFinder
         // Adjust the percentage-based FaceDetails to account for 0-100 range
         var faceCenterX = faceDetails.FaceCenter.X / 100.0;
         var faceCenterY = faceDetails.FaceCenter.Y / 100.0;
-        var faceWidthPercent = faceDetails.FaceWidth / 100.0;
-        var faceHeightPercent = faceDetails.FaceHeight / 100.0;
+        var faceWidthPercent = faceDetails.FaceWidth / 100.0 * 1.5;
+        var faceHeightPercent = faceDetails.FaceHeight / 100.0 * 1.5;
 
         // Convert to pixel coordinates (factor out bitmap.Width and bitmap.Height)
         using var bitmap = SKBitmap.Decode(imageFile.FullName);
@@ -81,13 +82,18 @@ public class FaceFinder
         var faceY = (int)((faceCenterY - faceHeightPercent / 2.0) * bitmap.Height);
         var faceWidth = (int)(faceWidthPercent * bitmap.Width);
         var faceHeight = (int)(faceHeightPercent * bitmap.Height);
-        var faceRect = new SKRectI(faceX, faceY, faceX + faceWidth, faceY + faceHeight);
+        var faceRect = new SKRectI(
+            faceX.Clamp(0, bitmap.Width - 1),
+            faceY.Clamp(0, bitmap.Height - 1),
+            (faceX + faceWidth).Clamp(faceX + 1, bitmap.Width - 1),
+            (faceY + faceHeight).Clamp(faceY + 1, bitmap.Height - 1)
+        );
 
         // Extract the subset of the bitmap that contains the face.
         var faceBitmap = new SKBitmap();
         if (bitmap.ExtractSubset(faceBitmap, faceRect))
             return faceBitmap;
-        
+
         faceBitmap.Dispose();
         return null;
     }
