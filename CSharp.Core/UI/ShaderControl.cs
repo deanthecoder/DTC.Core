@@ -85,11 +85,15 @@ public class ShaderControl : UserControl
                 throw new InvalidOperationException($"{nameof(ControlSource)} has already been set.");
             m_controlSource = value ?? throw new ArgumentNullException();
 
+            // Slightly decrease the time between frames to reduce
+            // the overhead of the dispatcher loop.
+            var adjustedFps = Fps + 2.0;
             DispatcherTimer.Run(() =>
-            {
-                RenderSourceAsImage();
-                return true;
-            }, TimeSpan.FromSeconds(1.0 / Fps));
+                {
+                    RenderSourceAsImage();
+                    return true;
+                },
+                TimeSpan.FromSeconds(1.0 / adjustedFps));
         }
     }
 
