@@ -8,6 +8,8 @@
 // about your modifications. Your contributions are valued!
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+using System.Diagnostics;
+
 namespace CSharp.Core;
 
 /// <summary>
@@ -35,11 +37,10 @@ public class Animation
         // Wait for the delay before starting the animation
         await Task.Delay(m_delay);
 
-        var startTime = Environment.TickCount;
+        var stopwatch = Stopwatch.StartNew();
         while (true)
         {
-            var currentTime = Environment.TickCount;
-            var progress = (currentTime - startTime) / m_duration.TotalMilliseconds;
+            var progress = stopwatch.ElapsedMilliseconds / m_duration.TotalMilliseconds;
 
             if (progress >= 1.0)
             {

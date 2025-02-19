@@ -8,6 +8,7 @@
 // about your modifications. Your contributions are valued!
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+using System.Diagnostics;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
@@ -269,9 +270,9 @@ public class ShaderControl : UserControl
 
         public ShaderVisualHandler(Dictionary<string, Func<float[]>> uniforms)
         {
-            var startTime = (float)Environment.TickCount;
+            var stopwatch = Stopwatch.StartNew();
             m_customUniforms = uniforms;
-            m_customUniforms["iTime"] = () => new[] { (Environment.TickCount - startTime) / 1000.0f };
+            m_customUniforms["iTime"] = () => [(float)stopwatch.Elapsed.TotalSeconds];
         }
 
         /// <summary>
