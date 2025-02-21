@@ -66,6 +66,12 @@ public static class NumberExtensions
     /// </summary>
     public static float SmoothNoise(this (float X, float Y) f) =>
         Noise.GetSimplex(f.X, f.Y) * 0.5f + 0.5f;
+    
+    /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static float SmoothNoise(this (int X, int Y) f) =>
+        Noise.GetSimplex(f.X, f.Y) * 0.5f + 0.5f;
 
     /// <summary>
     /// Smooth noise function that returns value between 0.0 and 1.0.
@@ -78,6 +84,9 @@ public static class NumberExtensions
     /// </summary>
     public static float SmoothNoise(this float f) =>
         SmoothNoise((f, 1.0f));
+
+    public static bool NextBool(this Random rand) =>
+        rand.NextDouble() > 0.5;
 
     /// <summary>
     /// Computes the cross product of two 2D vectors.

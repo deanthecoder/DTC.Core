@@ -134,4 +134,43 @@ public static class FileInfoExtensions
     /// </summary>
     public static bool AreFilesEqual(this FileInfo source, FileInfo dest) =>
         source.Length == dest.Length && source.LastWriteTime == dest.LastWriteTime;
+
+    /// <summary>
+    /// Try to deduce whether the file is (mostly) text-based.
+    /// </summary>
+    public static bool IsTextFile(this FileInfo file)
+    {
+        if (!file.Exists)
+            throw new FileNotFoundException(file.FullName);
+        if (file.Length == 0)
+            return false; // Nothing to check for.
+
+        // Read a sample of the file.
+        using var stream = file.OpenRead();
+        var buffer = new byte[(int)Math.Min(4096L, file.Length)];
+        var byteCount = stream.Read(buffer);
+        if (byteCount < 2)
+            return false;
+
+        // Check for common BOMs.
+        if ((byteCount >= 3 && buffer[0] == 0xEF && buffer[1] == 0xBB && buffer[2] == 0xBF) ||  // UTF-8 BOM
+            (buffer[0] == 0xFF && buffer[1] == 0xFE) ||  // UTF-16 LE BOM
+            (buffer[0] == 0xFE && buffer[1] == 0xFF))    // UTF-16 BE BOM
+        {
+            return true;
+        }
+
+        var printableCount = 0;
+        for (var i = 0; i < byteCount; i++)
+        {
+            var b = buffer[i];
+            if (b >= 32 && b <= 126)  // Printable ASCII (letters, numbers, symbols)
+                printableCount++;
+            else if (b == 9 || b == 10 || b == 13) // Tabs, newlines (valid in text)
+                printableCount++;
+        }
+
+        // If at least 90% of the file is printable characters, it's text.
+        return printableCount >= byteCount * 0.90;
+    }
 }

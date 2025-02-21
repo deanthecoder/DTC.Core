@@ -50,4 +50,7 @@ public static class StringExtensions
 
     public static string StringOrDefault(this string s, string fallback) =>
         string.IsNullOrEmpty(s) ? fallback : s;
+    
+    public static bool IsPrintable(this char ch) =>
+        !char.IsControl(ch) && char.IsAscii(ch);
 }
