@@ -115,7 +115,7 @@ public static class NumberExtensions
 
     public static char ToAscii(this double f)
     {
-        const string gradient = " .,;ilS8$@";
+        const string gradient = " .,;ilS8@";
         var index = (int)Math.Round(f.Clamp(0.0, 1.0) * (gradient.Length - 1));
         return gradient[index];
     }
