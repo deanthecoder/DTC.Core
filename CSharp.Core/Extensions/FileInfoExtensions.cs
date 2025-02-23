@@ -144,6 +144,11 @@ public static class FileInfoExtensions
             throw new FileNotFoundException(file.FullName);
         if (file.Length == 0)
             return false; // Nothing to check for.
+        
+        // Handle common file extensions.
+        var extensions = ".axaml,.bat,.c,.cpp,.cs,.csv,.csproj,.dotsettings,.gitignore,.glsl,.htm,.html,.ini,.iss,.json,.md,.ps1,.pubxml,.resx,.sh,.sksl,.sln,.txt,.user,.vcxproj,.xaml,.xml.h".Split(',');
+        if (extensions.Contains(file.Extension.ToLowerInvariant()))
+            return true;
 
         // Read a sample of the file.
         using var stream = file.OpenRead();
