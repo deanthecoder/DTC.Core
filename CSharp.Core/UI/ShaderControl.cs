@@ -31,7 +31,9 @@ public class ShaderControl : UserControl
     private CompositionCustomVisual m_customVisual;
     private Control m_controlSource;
     private SKBitmap m_sourceControlBitmap;
+    private SKBitmap m_blurredControlBitmap;
     private ShaderVisualHandler m_visualHandler;
+    private RenderTargetBitmap m_renderTargetBitmap;
 
     /// <summary>
     /// Defines the Uri property for the shader source.
@@ -143,17 +145,30 @@ public class ShaderControl : UserControl
         {
             m_sourceControlBitmap?.Dispose();
             m_sourceControlBitmap = new SKBitmap(new SKImageInfo((int)Bounds.Width, (int)Bounds.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
+            m_blurredControlBitmap?.Dispose();
+            m_blurredControlBitmap = new SKBitmap(new SKImageInfo((int)Bounds.Width, (int)Bounds.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
+            m_renderTargetBitmap?.Dispose();
+            m_renderTargetBitmap = new RenderTargetBitmap(new PixelSize(m_sourceControlBitmap.Width, m_sourceControlBitmap.Height));
         }
 
-        using var rtb = new RenderTargetBitmap(new PixelSize(m_sourceControlBitmap.Width, m_sourceControlBitmap.Height));
-        rtb.Render(ControlSource);
+        // Get the image of the Avalonia source control.
+        m_renderTargetBitmap.Render(ControlSource);
 
-        rtb.CopyPixels(
-            new PixelRect(0, 0, m_sourceControlBitmap.Width, m_sourceControlBitmap.Height),
-            m_sourceControlBitmap.GetPixels(),
-            m_sourceControlBitmap.ByteCount,
-            m_sourceControlBitmap.RowBytes);
+        // Convert it to an SKBitmap.
+        m_renderTargetBitmap.CopyPixels(
+            new PixelRect(0, 0, m_blurredControlBitmap.Width, m_blurredControlBitmap.Height),
+            m_blurredControlBitmap.GetPixels(),
+            m_blurredControlBitmap.ByteCount,
+            m_blurredControlBitmap.RowBytes);
 
+        // Combine image with the previous frame, to add motion blur.
+        using var paint = new SKPaint();
+        paint.Color = new SKColor(0xff, 0xff, 0xff, 120);
+        paint.BlendMode = SKBlendMode.SrcOver;
+        using var canvas = new SKCanvas(m_sourceControlBitmap);
+        canvas.DrawBitmap(m_blurredControlBitmap, 0, 0, paint);
+
+        // Set the image to send to the shader for display.
         m_visualHandler.SourceBitmap = m_sourceControlBitmap;
     }
 
