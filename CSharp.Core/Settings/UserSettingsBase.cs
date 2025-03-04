@@ -77,17 +77,29 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
             JsonConvert.PopulateObject(m_filePath.ReadAllText(), m_state, CreateSerializerSettings());
     }
 
-    public void Dispose() =>
-        m_filePath.WriteAllText(JsonConvert.SerializeObject(m_state, Formatting.Indented, CreateSerializerSettings()));
+    public void Dispose() => Save();
+
+    public void Save()
+    {
+        try
+        {
+            m_filePath.WriteAllText(JsonConvert.SerializeObject(m_state, Formatting.Indented, CreateSerializerSettings()));
+        }
+        catch (Exception e)
+        {
+            Logger.Instance.Exception($"Failed to serialize app settings to '{m_filePath}'.", e);
+            throw;
+        }
+    }
 
     private static JsonSerializerSettings CreateSerializerSettings() =>
         new JsonSerializerSettings
         {
-            Converters = new JsonConverter[]
-            {
+            Converters =
+            [
                 new FileInfoConverter(),
                 new DirectoryInfoConverter(),
                 new StringEnumConverter()
-            }
+            ]
         };
 }

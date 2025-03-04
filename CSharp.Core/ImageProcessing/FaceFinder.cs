@@ -57,9 +57,10 @@ public class FaceFinder
             if (!response.IsSuccessStatusCode)
                 return null; // Failed.
         }
-        catch (Exception)
+        catch (Exception e)
         {
             // Network access problem.
+            Logger.Instance.Exception("Face detection POST request failed.", e);
             return null;
         }
 
