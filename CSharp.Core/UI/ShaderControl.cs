@@ -93,7 +93,15 @@ public class ShaderControl : UserControl
             var adjustedFps = Fps + 2.0;
             DispatcherTimer.Run(() =>
                 {
-                    RenderSourceAsImage();
+                    try
+                    {
+                        RenderSourceAsImage();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Instance.Exception("Failed to capture control as image.", e);
+                    }
+                    
                     return true;
                 },
                 TimeSpan.FromSeconds(1.0 / adjustedFps));
@@ -162,12 +170,14 @@ public class ShaderControl : UserControl
             m_blurredControlBitmap.RowBytes);
 
         // Combine image with the previous frame, to add motion blur.
-        using var paint = new SKPaint();
-        paint.Color = new SKColor(0xff, 0xff, 0xff, 120);
-        paint.BlendMode = SKBlendMode.SrcOver;
-        using var canvas = new SKCanvas(m_sourceControlBitmap);
-        canvas.DrawBitmap(m_blurredControlBitmap, 0, 0, paint);
-
+        using (var paint = new SKPaint())
+        using (var canvas = new SKCanvas(m_sourceControlBitmap))
+        {
+            paint.Color = new SKColor(0xff, 0xff, 0xff, 120);
+            paint.BlendMode = SKBlendMode.SrcOver;
+            canvas.DrawBitmap(m_blurredControlBitmap, 0, 0, paint);
+        }
+        
         // Set the image to send to the shader for display.
         m_visualHandler.SourceBitmap = m_sourceControlBitmap;
     }

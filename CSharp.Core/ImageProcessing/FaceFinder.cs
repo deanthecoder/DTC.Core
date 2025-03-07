@@ -55,7 +55,11 @@ public class FaceFinder
         {
             response = await httpClient.PostAsync(requestUrl, form);
             if (!response.IsSuccessStatusCode)
+            {
+                Logger.Instance.Warn($"Face detection POST request failed: {response.ReasonPhrase}");
+                Logger.Instance.Info($"{response.RequestMessage}");
                 return null; // Failed.
+            }
         }
         catch (Exception e)
         {
