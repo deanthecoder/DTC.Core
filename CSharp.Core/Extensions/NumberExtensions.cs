@@ -60,6 +60,12 @@ public static class NumberExtensions
     /// </summary>
     public static double SmoothNoise(this (double X, double Y) f) =>
         Noise.GetSimplex((float)f.X, (float)f.Y) * 0.5 + 0.5;
+    
+    /// <summary>
+    /// Smooth noise function that returns value between 0.0 and 1.0.
+    /// </summary>
+    public static double SmoothNoise(this (double X, double Y, double Z) f) =>
+        Noise.GetSimplex((float)f.X, (float)f.Y, (float)f.Z) * 0.5 + 0.5;
 
     /// <summary>
     /// Smooth noise function that returns value between 0.0 and 1.0.
