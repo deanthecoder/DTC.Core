@@ -36,6 +36,8 @@ public readonly struct IntPoint : IEquatable<IntPoint>
     public static bool operator !=(IntPoint left, IntPoint right) => !left.Equals(right);
 
     public override string ToString() => $"({X}, {Y})";
+    
+    public IntPoint WithDelta(int dX, int dY) => new IntPoint(X + dX, Y + dY);
 
     public double DistanceSquared(IntPoint pt)
     {

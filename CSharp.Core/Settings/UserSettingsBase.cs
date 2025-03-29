@@ -86,8 +86,20 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
     protected UserSettingsBase()
     {
         ApplyDefaults();
-        if (m_filePath.Exists)
-            JsonConvert.PopulateObject(m_filePath.ReadAllText(), m_state, CreateSerializerSettings());
+        if (!m_filePath.Exists)
+            return;
+        
+        // Restore state from JSON.
+        JsonConvert.PopulateObject(m_filePath.ReadAllText(), m_state, CreateSerializerSettings());
+            
+        // Remove any surplus keys from the JSON.
+        var knownProperties =
+            GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Select(o => o.Name);
+        var surplusJsonKeys = m_state.Keys.Except(knownProperties).ToArray();
+        foreach (var surplusJsonKey in surplusJsonKeys)
+            m_state.Remove(surplusJsonKey);
     }
 
     public void Dispose() => Save();
