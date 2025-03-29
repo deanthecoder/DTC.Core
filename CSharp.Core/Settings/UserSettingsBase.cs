@@ -49,16 +49,29 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
                 value = s.ToFile();
                 m_state[key] = value;
             }
-        } else if (typeof(T) == typeof(DirectoryInfo))
+        }
+        else if (typeof(T) == typeof(DirectoryInfo))
         {
             if (value is string s)
             {
                 value = s.ToDir();
                 m_state[key] = value;
             }
-        } else if (value is JToken token)
+        }
+        else if (typeof(T) == typeof(byte[]))
+        {
+            // Convert value from base64 string
+            if (value is string s)
+            {
+                value = Convert.FromBase64String(s);
+                m_state[key] = value;
+            }
+        }
+        else if (value is JToken token)
+        {
             value = token.ToObject<T>();
-        
+        }
+
         return (T)value;
     }
 
