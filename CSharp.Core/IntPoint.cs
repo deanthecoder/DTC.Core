@@ -12,6 +12,8 @@ namespace CSharp.Core;
 
 public readonly struct IntPoint : IEquatable<IntPoint>
 {
+    public static IntPoint Zero { get; } = new IntPoint(0, 0);
+    
     public int X { get; }
     public int Y { get; }
 
@@ -34,4 +36,14 @@ public readonly struct IntPoint : IEquatable<IntPoint>
     public static bool operator !=(IntPoint left, IntPoint right) => !left.Equals(right);
 
     public override string ToString() => $"({X}, {Y})";
+
+    public double DistanceSquared(IntPoint pt)
+    {
+        var dx = pt.X - X;
+        var dy = pt.Y - Y;
+        return dx * dx + dy * dy;
+    }
+
+    public int ManhattanDistance(IntPoint pt) =>
+        Math.Abs(X - pt.X) + Math.Abs(Y - pt.Y);
 }

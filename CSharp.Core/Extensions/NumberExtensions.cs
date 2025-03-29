@@ -19,10 +19,10 @@ public static class NumberExtensions
     private static readonly FastNoise Noise = new FastNoise();
     
     public static int Clamp(this int f, int min, int max) =>
-        Math.Max(min, Math.Min(max, f));
+        Math.Clamp(f, min, max);
     
     public static double Clamp(this double f, double min, double max) =>
-        Math.Max(min, Math.Min(max, f));
+        Math.Clamp(f, min, max);
 
     public static float Clamp(this float f, float min, float max) =>
         MathF.Max(min, MathF.Min(max, f));

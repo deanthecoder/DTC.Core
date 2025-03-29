@@ -16,13 +16,13 @@ namespace CSharp.Core.Extensions;
 
 public static class EnumerableExtensions
 {
-    public static string ToCsv(this IList collection)
+    public static string ToCsv(this IList collection, char ch = ',')
     {
         var sb = new StringBuilder();
         foreach (var o in collection)
         {
             if (sb.Length > 0)
-                sb.Append(',');
+                sb.Append(ch);
             sb.Append(o);
         }
 

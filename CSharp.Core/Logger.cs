@@ -68,7 +68,8 @@ public class Logger
     /// </summary>
     public void SysInfo()
     {
-        Info($"OS: {Environment.OSVersion}");
+        var osName = OperatingSystem.IsWindows() ? "Windows" : OperatingSystem.IsMacOS() ? "Mac" : "Linux";
+        Info($"OS: {osName} ({Environment.OSVersion})");
         Info($"Assembly: {Assembly.GetEntryAssembly()?.GetName().Name ?? "<Unknown>"}");
         Info($"Arguments: {Environment.CommandLine}");
         Info($"Locale: {CultureInfo.CurrentCulture}");

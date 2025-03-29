@@ -9,6 +9,7 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CSharp.Core.Extensions;
@@ -53,4 +54,7 @@ public static class StringExtensions
     
     public static bool IsPrintable(this char ch) =>
         !char.IsControl(ch) && char.IsAscii(ch);
+
+    public static byte[] Compress(this string s) =>
+        Encoding.UTF8.GetBytes(s).Compress();
 }

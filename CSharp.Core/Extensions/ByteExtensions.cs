@@ -10,6 +10,7 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System.Diagnostics;
+using System.Text;
 using K4os.Compression.LZ4;
 
 namespace CSharp.Core.Extensions;
@@ -21,6 +22,9 @@ public static class ByteExtensions
 
     public static byte[] Decompress(this byte[] input) =>
         LZ4Pickler.Unpickle(input);
+
+    public static string DecompressToString(this byte[] input) =>
+        Encoding.UTF8.GetString(Decompress(input));
 
     public static bool IsBitSet(this byte b, byte i)
     {
