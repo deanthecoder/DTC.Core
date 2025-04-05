@@ -154,14 +154,11 @@ public class NeuralNetwork
         foreach (var layer in m_neurons)
             Array.Clear(layer, 0, layer.Length);
 
-        var length1 = m_weights.Length;
-        for (var l = 0; l < length1; l++)
+        for (var l = 0; l < m_weights.Length; l++)
         {
-            var length2 = m_weights[l].Length;
-            for (var j = 0; j < length2; j++)
+            for (var j = 0; j < m_weights[l].Length; j++)
             {
-                var length3 = m_weights[l][j].Length;
-                for (var i = 0; i < length3; i++)
+                for (var i = 0; i < m_weights[l][j].Length; i++)
                     m_weights[l][j][i] = m_rand.NextDouble() - 0.5; // Reinit
             }
         }
@@ -170,14 +167,11 @@ public class NeuralNetwork
     public NeuralNetwork AverageWith(NeuralNetwork other)
     {
         var result = Clone();
-        var length1 = m_weights.Length;
-        for (var l = 0; l < length1; l++)
+        for (var l = 0; l < m_weights.Length; l++)
         {
-            var length2 = m_weights[l].Length;
-            for (var j = 0; j < length2; j++)
+            for (var j = 0; j < m_weights[l].Length; j++)
             {
-                var length3 = m_weights[l][j].Length;
-                for (var i = 0; i < length3; i++)
+                for (var i = 0; i < m_weights[l][j].Length; i++)
                     result.m_weights[l][j][i] = (m_weights[l][j][i] + other.m_weights[l][j][i]) / 2.0;
             }
         }
@@ -187,14 +181,11 @@ public class NeuralNetwork
     public NeuralNetwork MixWith(NeuralNetwork other)
     {
         var result = Clone();
-        var length1 = m_weights.Length;
-        for (var l = 0; l < length1; l++)
+        for (var l = 0; l < m_weights.Length; l++)
         {
-            var length2 = m_weights[l].Length;
-            for (var j = 0; j < length2; j++)
+            for (var j = 0; j < m_weights[l].Length; j++)
             {
-                var length3 = m_weights[l][j].Length;
-                for (var i = 0; i < length3; i++)
+                for (var i = 0; i < m_weights[l][j].Length; i++)
                     result.m_weights[l][j][i] = m_rand.NextBool() ? m_weights[l][j][i] : other.m_weights[l][j][i];
             }
         }
@@ -204,14 +195,11 @@ public class NeuralNetwork
     public NeuralNetwork NudgeWeights()
     {
         var result = Clone();
-        var length1 = m_weights.Length;
-        for (var l = 0; l < length1; l++)
+        for (var l = 0; l < m_weights.Length; l++)
         {
-            var length2 = m_weights[l].Length;
-            for (var j = 0; j < length2; j++)
+            for (var j = 0; j < m_weights[l].Length; j++)
             {
-                var length3 = m_weights[l][j].Length;
-                for (var i = 0; i < length3; i++)
+                for (var i = 0; i < m_weights[l][j].Length; i++)
                     result.m_weights[l][j][i] = ((m_rand.NextDouble() * 0.2 - 0.1) + m_weights[l][j][i]).Clamp(-1.0, 1.0);
             }
         }
@@ -220,19 +208,21 @@ public class NeuralNetwork
 
     public NeuralNetwork Clone()
     {
-        var clone = new NeuralNetwork(m_layerSizes[0], m_layerSizes.Skip(1).ToArray(), m_layerSizes[^1], m_learningRate);
-        var length1 = m_weights.Length;
-        for (var l = 0; l < length1; l++)
+        var clone = new NeuralNetwork(
+            m_layerSizes[0],
+            m_layerSizes.Skip(1).Take(m_layerSizes.Length - 2).ToArray(),
+            m_layerSizes[^1],
+            m_learningRate
+        );
+        for (var l = 0; l < m_weights.Length; l++)
         {
-            var length2 = m_weights[l].Length;
-            for (var j = 0; j < length2; j++)
+            for (var j = 0; j < m_weights[l].Length; j++)
             {
-                var length3 = m_weights[l][j].Length;
-                for (var i = 0; i < length3; i++)
+                for (var i = 0; i < m_weights[l][j].Length; i++)
                     clone.m_weights[l][j][i] = m_weights[l][j][i];
             }
         }
-     
+
         return clone;
     }
 }
