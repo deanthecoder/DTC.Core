@@ -117,30 +117,6 @@ public class NeuralNetwork
         }
     }
 
-    public int ChooseAction(double[] input)
-    {
-        var qValues = Predict(input);
-        return ArgMax(qValues);
-    }
-
-    /// <summary>
-    /// Finds the index of the maximum value in the array.
-    /// </summary>
-    private static int ArgMax(double[] values)
-    {
-        var bestIndex = 0;
-        var bestValue = values[0];
-        for (var i = 1; i < values.Length; i++)
-        {
-            if (values[i] > bestValue)
-            {
-                bestValue = values[i];
-                bestIndex = i;
-            }
-        }
-        return bestIndex;
-    }
-
     /// <summary>
     /// Rectified Linear Unit activation function.
     /// </summary>
