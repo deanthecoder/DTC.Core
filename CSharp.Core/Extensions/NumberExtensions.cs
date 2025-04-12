@@ -146,4 +146,12 @@ public static class NumberExtensions
     public static float NextFloat(this Random rand) => (float)rand.NextDouble();
     
     public static Vector2 ToDirection(this float theta) => new Vector2(MathF.Sin(theta), -MathF.Cos(theta));
+    
+    public static Vector2 ToDirection(this double theta) => new Vector2((float)Math.Sin(theta), (float)-Math.Cos(theta));
+    
+    public static string ToProgressBar(this double f, int width, char fill = '█', char empty = '░')
+    {
+        var filledWidth = (int)(width * f.Clamp(0.0, 1.0));
+        return new string(fill, filledWidth) + new string(empty, width - filledWidth);
+    }
 }
