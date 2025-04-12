@@ -19,4 +19,6 @@ public record Rgb(byte R, byte G, byte B)
     
     public static implicit operator Rgb(Color color) => new Rgb(color.R, color.G, color.B);
     public static implicit operator Color(Rgb rgb) => Color.FromRgb(rgb.R, rgb.G, rgb.B);
+
+    public double Luminosity() => R * 0.2126 + G * 0.7152 + B * 0.0722;
 }

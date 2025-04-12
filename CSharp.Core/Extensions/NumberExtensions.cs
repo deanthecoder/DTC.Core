@@ -142,4 +142,8 @@ public static class NumberExtensions
         var formattedValue = bytes / Math.Pow(1024, order);
         return $"{formattedValue:N2} {sizes[order]}";
     }
+    
+    public static float NextFloat(this Random rand) => (float)rand.NextDouble();
+    
+    public static Vector2 ToDirection(this float theta) => new Vector2(MathF.Sin(theta), -MathF.Cos(theta));
 }
