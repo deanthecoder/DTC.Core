@@ -52,6 +52,11 @@ public class NeuralNetwork
     /// </summary>
     public double[] Predict(double[] input)
     {
+#if DEBUG
+        if (input.Any(o => o < -1.0 || o > 1.0))
+            throw new ArgumentException("Input values must be in the range [-1, 1].");
+#endif
+        
         Array.Copy(input, m_neurons[0], input.Length);
 
         for (var l = 1; l < m_layerSizes.Length; l++)
@@ -123,9 +128,9 @@ public class NeuralNetwork
     private static double ReLu(double x) => Math.Max(0, x);
 
     /// <summary>
-    /// Clears neuron states and reinitializes weights with small random values.
+    /// Clears neuron states and reinitializes weights with random values.
     /// </summary>
-    public void Clear()
+    private void Clear()
     {
         foreach (var layer in m_neurons)
             Array.Clear(layer, 0, layer.Length);
@@ -135,12 +140,12 @@ public class NeuralNetwork
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    m_weights[l][j][i] = m_rand.NextDouble() - 0.5; // Reinit
+                    m_weights[l][j][i] = m_rand.NextDouble() * 2.0 - 1.0; // Reinit
             }
         }
     }
 
-    public NeuralNetwork AverageWith(NeuralNetwork other)
+    public NeuralNetwork CreateAveraged(NeuralNetwork other)
     {
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
@@ -154,7 +159,7 @@ public class NeuralNetwork
         return result;
     }
 
-    public NeuralNetwork MixWith(NeuralNetwork other)
+    public NeuralNetwork CreateMixed(NeuralNetwork other)
     {
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
@@ -168,7 +173,7 @@ public class NeuralNetwork
         return result;
     }
     
-    public NeuralNetwork NudgeWeights()
+    public NeuralNetwork CloneWithNudgeWeights()
     {
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)

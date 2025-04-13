@@ -144,10 +144,16 @@ public static class NumberExtensions
     }
     
     public static float NextFloat(this Random rand) => (float)rand.NextDouble();
+
+    /// <summary>
+    /// Zero radians => Right. Positive is clockwise.
+    /// </summary>
+    public static Vector2 ToDirection(this float theta) => new Vector2(MathF.Cos(theta), MathF.Sin(theta));
     
-    public static Vector2 ToDirection(this float theta) => new Vector2(MathF.Sin(theta), -MathF.Cos(theta));
-    
-    public static Vector2 ToDirection(this double theta) => new Vector2((float)Math.Sin(theta), (float)-Math.Cos(theta));
+    /// <summary>
+    /// Zero radians => Right. Positive is clockwise.
+    /// </summary>
+    public static Vector2 ToDirection(this double theta) => new Vector2((float)Math.Cos(theta), (float)Math.Sin(theta));
     
     public static string ToProgressBar(this double f, int width, char fill = '█', char empty = '░')
     {
