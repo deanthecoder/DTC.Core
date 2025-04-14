@@ -95,6 +95,17 @@ public static class NumberExtensions
         rand.NextDouble() > 0.5;
 
     /// <summary>
+    /// Returns a single sample (+/-) from a Gaussian distribution with given mean and standard deviation.
+    /// </summary>
+    public static double GaussianSample(this Random rand, double stdDev = 1.0)
+    {
+        var u1 = 1.0 - rand.NextDouble();
+        var u2 = 1.0 - rand.NextDouble();
+        var randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(Math.Tau * u2); // Box-Muller.
+        return stdDev * randStdNormal;
+    }
+
+    /// <summary>
     /// Computes the cross product of two 2D vectors.
     /// </summary>
     public static float Cross(this Vector2 a, Vector2 b) =>

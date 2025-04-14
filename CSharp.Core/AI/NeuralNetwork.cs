@@ -24,6 +24,8 @@ public class NeuralNetwork
     [JsonProperty] private double[][][] m_weights;
     [JsonProperty] private double m_learningRate;
     private readonly Random m_rand = new Random();
+    
+    public enum NudgeFactor { Low, High }
 
     /// <summary>
     /// Initializes a new neural network with the given layer sizes and learning rate.
@@ -173,15 +175,17 @@ public class NeuralNetwork
         return result;
     }
     
-    public NeuralNetwork CloneWithNudgeWeights()
+    public NeuralNetwork CloneWithNudgeWeights(NudgeFactor nudge)
     {
+        var nudgeWeight = nudge == NudgeFactor.Low ? 0.075 : 0.4;
+        
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    result.m_weights[l][j][i] = ((m_rand.NextDouble() * 0.2 - 0.1) + m_weights[l][j][i]).Clamp(-1.0, 1.0);
+                    result.m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + m_rand.GaussianSample(nudgeWeight));
             }
         }
         return result;
