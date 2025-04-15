@@ -147,7 +147,7 @@ public class NeuralNetwork
         }
     }
 
-    public NeuralNetwork CreateAveraged(NeuralNetwork other)
+    public NeuralNetwork CreateLerped(NeuralNetwork other, double mix)
     {
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
@@ -155,13 +155,13 @@ public class NeuralNetwork
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    result.m_weights[l][j][i] = (m_weights[l][j][i] + other.m_weights[l][j][i]) / 2.0;
+                    result.m_weights[l][j][i] = mix.Lerp(m_weights[l][j][i], other.m_weights[l][j][i]);
             }
         }
         return result;
     }
 
-    public NeuralNetwork CreateMixed(NeuralNetwork other)
+    public NeuralNetwork CreateSpliced(NeuralNetwork other)
     {
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
@@ -177,7 +177,7 @@ public class NeuralNetwork
     
     public NeuralNetwork CloneWithNudgeWeights(NudgeFactor nudge)
     {
-        var nudgeWeight = nudge == NudgeFactor.Low ? 0.075 : 0.4;
+        var nudgeWeight = nudge == NudgeFactor.Low ? 0.05 : 0.3;
         
         var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
