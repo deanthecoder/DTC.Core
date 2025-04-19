@@ -11,6 +11,7 @@
 
 // ReSharper disable ForCanBeConvertedToForeach
 // ReSharper disable LoopCanBeConvertedToQuery
+// ReSharper disable MemberCanBePrivate.Global
 namespace CSharp.Core.Extensions;
 
 public static class FastLinq
@@ -357,7 +358,7 @@ public static class FastLinq
         return items[minIndex];
     }
     
-    public static int FastFindMin<T>(this IList<int> items)
+    public static int FastFindMin(this IList<int> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");
@@ -377,7 +378,7 @@ public static class FastLinq
         return items[minIndex];
     }
     
-    public static float FastFindMin<T>(this IList<float> items)
+    public static float FastFindMin(this IList<float> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");
@@ -397,7 +398,7 @@ public static class FastLinq
         return items[minIndex];
     }
     
-    public static double FastFindMin<T>(this IList<double> items)
+    public static double FastFindMin(this IList<double> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");
@@ -477,7 +478,7 @@ public static class FastLinq
         return items[maxIndex];
     }
     
-    public static int FastFindMax<T>(this IList<int> items)
+    public static int FastFindMax(this IList<int> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");
@@ -497,7 +498,7 @@ public static class FastLinq
         return items[maxIndex];
     }
     
-    public static float FastFindMax<T>(this IList<float> items)
+    public static float FastFindMax(this IList<float> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");
@@ -517,7 +518,7 @@ public static class FastLinq
         return items[maxIndex];
     }
     
-    public static double FastFindMax<T>(this IList<double> items)
+    public static double FastFindMax(this IList<double> items)
     {
         if (items.Count == 0)
             throw new InvalidOperationException("Sequence contains no elements.");

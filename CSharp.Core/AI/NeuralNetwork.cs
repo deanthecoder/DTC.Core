@@ -23,9 +23,6 @@ public class NeuralNetwork
     [JsonProperty] private double[][] m_neurons;
     [JsonProperty] private double[][][] m_weights;
     [JsonProperty] private double m_learningRate;
-    private readonly Random m_rand = new Random();
-    
-    public enum NudgeFactor { Low, High }
 
     /// <summary>
     /// Initializes a new neural network with the given layer sizes and learning rate.
@@ -136,59 +133,50 @@ public class NeuralNetwork
     {
         foreach (var layer in m_neurons)
             Array.Clear(layer, 0, layer.Length);
+        Randomize();
+    }
 
+    public void Randomize()
+    {
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    m_weights[l][j][i] = m_rand.NextDouble() * 2.0 - 1.0; // Reinit
+                    m_weights[l][j][i] = Random.Shared.NextDouble() * 2 - 1;
             }
         }
     }
 
-    public NeuralNetwork CreateLerped(NeuralNetwork other, double mix)
+    public void CrossWith(NeuralNetwork other, double crossoverRate)
     {
-        var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    result.m_weights[l][j][i] = mix.Lerp(m_weights[l][j][i], other.m_weights[l][j][i]);
+                {
+                    if (Random.Shared.NextDouble() < crossoverRate)
+                        m_weights[l][j][i] = other.m_weights[l][j][i];
+                }
             }
         }
-        return result;
-    }
-
-    public NeuralNetwork CreateSpliced(NeuralNetwork other)
-    {
-        var result = Clone();
-        for (var l = 0; l < m_weights.Length; l++)
-        {
-            for (var j = 0; j < m_weights[l].Length; j++)
-            {
-                for (var i = 0; i < m_weights[l][j].Length; i++)
-                    result.m_weights[l][j][i] = m_rand.NextBool() ? m_weights[l][j][i] : other.m_weights[l][j][i];
-            }
-        }
-        return result;
     }
     
-    public NeuralNetwork CloneWithNudgeWeights(NudgeFactor nudge)
+    public void Mutate(double mutationRate)
     {
-        var nudgeWeight = nudge == NudgeFactor.Low ? 0.05 : 0.3;
-        
-        var result = Clone();
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    result.m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + m_rand.GaussianSample(nudgeWeight));
+                {
+                    var rand = Random.Shared;
+                    if (rand.NextDouble() < mutationRate)
+                        m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + rand.GaussianSample(0.2));
+                }
             }
         }
-        return result;
     }
 
     public NeuralNetwork Clone()

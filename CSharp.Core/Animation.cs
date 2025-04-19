@@ -47,8 +47,7 @@ public class Animation
                 progress = 1.0; // Clamp progress at 1
 
                 // Call the callback with final value
-                if (!m_callback(progress))
-                    break;
+                m_callback(progress);
 
                 // Animation finished
                 return;
