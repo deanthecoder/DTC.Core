@@ -537,4 +537,14 @@ public static class FastLinq
         
         return items[maxIndex];
     }
+
+    public static int FastFindIndexOf<T>(this IList<T> items, T toFind)
+    {
+        for (var i = 0; i < items.Count; i++)
+        {
+            if (items[i]?.Equals(toFind) == true)
+                return i;
+        }
+        return -1;
+    }
 }
