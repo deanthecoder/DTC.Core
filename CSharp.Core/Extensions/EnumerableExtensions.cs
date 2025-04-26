@@ -9,14 +9,13 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
-using System.Collections;
 using System.Text;
 
 namespace CSharp.Core.Extensions;
 
 public static class EnumerableExtensions
 {
-    public static string ToCsv(this IList collection, char ch = ',')
+    public static string ToCsv<T>(this IEnumerable<T> collection, char ch = ',')
     {
         var sb = new StringBuilder();
         foreach (var o in collection)
