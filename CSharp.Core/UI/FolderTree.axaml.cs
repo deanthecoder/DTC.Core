@@ -58,17 +58,6 @@ public partial class FolderTree : UserControl
         InitializeComponent();
     }
 
-    // public DirectoryInfo Location
-    // {
-    //     get => m_location;
-    //     set
-    //     {
-    //         if (SetAndRaise(LocationProperty, ref m_location, value))
-    //         {
-    //         }
-    //     }
-    // }
-
     [DebuggerDisplay("{Directory.Name} (IsSelected={IsSelected}, IsExpanded={IsExpanded})")]
     public class FolderTreeNode : ViewModelBase
     {
