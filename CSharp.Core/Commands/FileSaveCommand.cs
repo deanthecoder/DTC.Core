@@ -9,10 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using CSharp.Core.Extensions;
+using System;
+using System.IO;
+using CSharp.Core.UI;
 
 namespace CSharp.Core.Commands;
 
@@ -39,34 +38,12 @@ public class FileSaveCommand : CommandBase
     public override bool CanExecute(object parameter) =>
         base.CanExecute(parameter) && m_canExecute();
 
+    // ReSharper disable once AsyncVoidMethod
     public override async void Execute(object parameter)
     {
-        var mainWindow = Application.Current?.GetMainWindow();
-        if (mainWindow == null)
-            return; // Cannot find the main application window.
-
-        // ReSharper disable once PossibleNullReferenceException
-        var selectedFile =
-            await TopLevel
-                .GetTopLevel(mainWindow)
-                .StorageProvider
-                .SaveFilePickerAsync(
-                                     new FilePickerSaveOptions
-                                     {
-                                         Title = m_title,
-                                         ShowOverwritePrompt = true,
-                                         SuggestedFileName = m_defaultName,
-                                         DefaultExtension = m_filterExtensions.FirstOrDefault()?.TrimStart('*'),
-                                         FileTypeChoices = new[]
-                                         {
-                                             new FilePickerFileType(m_filterName)
-                                             {
-                                                 Patterns = m_filterExtensions
-                                             }
-                                         }
-                                     });
+        var selectedFile = await DialogService.Instance.ShowFileSaveAsync(m_title, m_defaultName, m_filterName, m_filterExtensions);
         if (selectedFile != null)
-            FileSelected?.Invoke(this, selectedFile.Path.LocalPath.ToFile());
+            FileSelected?.Invoke(this, selectedFile);
         else
             Cancelled?.Invoke(this, null);
     }

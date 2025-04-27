@@ -9,7 +9,11 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using CSharp.Core.Commands;

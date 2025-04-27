@@ -12,6 +12,9 @@
 // ReSharper disable ForCanBeConvertedToForeach
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable MemberCanBePrivate.Global
+using System;
+using System.Collections.Generic;
+
 namespace CSharp.Core.Extensions;
 
 public static class FastLinq
@@ -546,5 +549,13 @@ public static class FastLinq
                 return i;
         }
         return -1;
+    }
+
+    public static bool AddIfUnique<T>(this IList<T> items, T item)
+    {
+        if (items.Contains(item))
+            return false;
+        items.Add(item);
+        return true;
     }
 }

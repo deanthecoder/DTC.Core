@@ -9,6 +9,10 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CSharp.Core;
 
 /// <summary>

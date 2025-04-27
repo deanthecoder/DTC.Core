@@ -9,6 +9,8 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
+
 namespace CSharp.Core.Commands;
 
 public class RelayCommand : CommandBase

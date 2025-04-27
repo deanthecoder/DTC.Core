@@ -9,10 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using CSharp.Core.Extensions;
+using System;
+using System.IO;
+using CSharp.Core.UI;
 
 namespace CSharp.Core.Commands;
 
@@ -32,31 +31,10 @@ public class FileOpenCommand : CommandBase
         m_filterExtensions = filterExtensions;
     }
 
+    // ReSharper disable once AsyncVoidMethod
     public override async void Execute(object parameter)
     {
-        var mainWindow = Application.Current?.GetMainWindow();
-        if (mainWindow == null)
-            return; // Cannot find the main application window.
-
-        // ReSharper disable once PossibleNullReferenceException
-        var files =
-            await TopLevel
-                .GetTopLevel(mainWindow)
-                .StorageProvider
-                .OpenFilePickerAsync(
-                                     new FilePickerOpenOptions
-                                     {
-                                         Title = m_title,
-                                         AllowMultiple = false,
-                                         FileTypeFilter = new[]
-                                         {
-                                             new FilePickerFileType(m_filterName)
-                                             {
-                                                 Patterns = m_filterExtensions
-                                             }
-                                         }
-                                     });
-        var selectedFile = files.FirstOrDefault()?.ToFileInfo();
+        var selectedFile = await DialogService.Instance.ShowFileOpenAsync(m_title, m_filterName, m_filterExtensions);
         if (selectedFile != null)
             FileSelected?.Invoke(this, selectedFile);
         else

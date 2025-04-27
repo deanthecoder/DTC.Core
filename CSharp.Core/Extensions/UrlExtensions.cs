@@ -9,6 +9,7 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
 using System.Diagnostics;
 
 namespace CSharp.Core.Extensions;

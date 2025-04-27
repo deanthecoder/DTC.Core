@@ -9,8 +9,13 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace CSharp.Core.Extensions;
 
@@ -42,6 +47,44 @@ public static class DirectoryInfoExtensions
 
         return !info.Exists();
     }
+    
+    public static DirectoryInfo[] TryGetDirs(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+    {
+        if (info?.Exists() != true)
+            return [];
+
+        var pending = new Queue<DirectoryInfo>();
+        pending.Enqueue(info);
+
+        var results = new List<DirectoryInfo>();
+        while (pending.Count > 0)
+        {
+            var current = pending.Dequeue();
+            try
+            {
+                foreach (var dir in current.EnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        _ = dir.Attributes;
+                        results.Add(dir);
+                        if (searchOption == SearchOption.AllDirectories)
+                            pending.Enqueue(dir);
+                    }
+                    catch
+                    {
+                        // Skip inaccessible subfolder.
+                    }
+                }
+            }
+            catch
+            {
+                // Skip inaccessible directory.
+            }
+        }
+
+        return results.ToArray();
+    }
 
     public static FileSystemInfo[] TryGetContent(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
@@ -54,7 +97,6 @@ public static class DirectoryInfoExtensions
         {
             // This is ok.
         }
-
         return [];
     }
 

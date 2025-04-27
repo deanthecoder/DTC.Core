@@ -9,6 +9,8 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System.IO;
+
 namespace CSharp.Core.Extensions;
 
 public static class TempDirectoryExtensions

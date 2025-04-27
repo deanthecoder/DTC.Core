@@ -8,6 +8,9 @@
 // about your modifications. Your contributions are valued!
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+using System;
+using System.Collections.Generic;
+
 namespace CSharp.Core.Extensions;
 
 public static class ListExtensions

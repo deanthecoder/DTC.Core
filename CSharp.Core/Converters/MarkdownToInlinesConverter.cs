@@ -9,7 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
 using System.Globalization;
+using System.Linq;
 using Avalonia.Controls.Documents;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
