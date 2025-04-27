@@ -24,43 +24,50 @@ namespace CSharp.Core.UI;
 
 public partial class FolderTree : UserControl
 {
+    private FolderTreeRoot m_root;
+    public static readonly DirectProperty<FolderTree, FolderTreeRoot> RootProperty = AvaloniaProperty.RegisterDirect<FolderTree, FolderTreeRoot>(nameof(Root), o => o.Root, (o, v) => o.Root = v);
+
     [UsedImplicitly]
     private ObservableCollection<FolderTreeNode> Nodes { get; } = [];
-    private DirectoryInfo m_location;
-    private ISelectedItemsProvider<DirectoryInfo> m_selectedItemsProvider;
-    public static readonly DirectProperty<FolderTree, ISelectedItemsProvider<DirectoryInfo>> SelectedItemsProviderProperty = AvaloniaProperty.RegisterDirect<FolderTree, ISelectedItemsProvider<DirectoryInfo>>(nameof(SelectedItemsProvider), o => o.SelectedItemsProvider, (o, v) => o.SelectedItemsProvider = v);
 
-    public static readonly DirectProperty<FolderTree, DirectoryInfo> LocationProperty =
-        AvaloniaProperty.RegisterDirect<FolderTree, DirectoryInfo>(nameof(Location), o => o.Location, (o, v) => o.Location = v);
+    public FolderTreeRoot Root
+    {
+        get => m_root;
+        set
+        {
+            if (!SetAndRaise(RootProperty, ref m_root, value))
+                return; // No change.
+
+            Nodes.Clear();
+            if (value == null)
+            {
+                m_root.SetSelectedItems([]);
+                return;
+            }
+            
+            var node = new FolderTreeNode { Directory = value.Root, IsExpanded = true, IsSelected = true};
+            node.SelectionChanged += (_, _) => m_root.SetSelectedItems(node.GetAllSelectedItems().ToArray());
+            Nodes.Add(node);
+
+            m_root.SetSelectedItems(node.GetAllSelectedItems().ToArray());
+        }
+    }
 
     public FolderTree()
     {
         InitializeComponent();
     }
 
-    public DirectoryInfo Location
-    {
-        get => m_location;
-        set
-        {
-            if (SetAndRaise(LocationProperty, ref m_location, value))
-            {
-                Nodes.Clear();
-                if (value == null)
-                    return;
-                var node = new FolderTreeNode { Directory = value, IsExpanded = true, IsSelected = true};
-                node.SelectionChanged += (_, _) => SelectedItemsProvider?.SetSelectedItems(node.GetAllSelectedItems().ToArray());
-                Nodes.Add(node);
-
-                SelectedItemsProvider?.SetSelectedItems(node.GetAllSelectedItems().ToArray());
-            }
-        }
-    }
-    public ISelectedItemsProvider<DirectoryInfo> SelectedItemsProvider
-    {
-        get => m_selectedItemsProvider;
-        set => SetAndRaise(SelectedItemsProviderProperty, ref m_selectedItemsProvider, value);
-    }
+    // public DirectoryInfo Location
+    // {
+    //     get => m_location;
+    //     set
+    //     {
+    //         if (SetAndRaise(LocationProperty, ref m_location, value))
+    //         {
+    //         }
+    //     }
+    // }
 
     [DebuggerDisplay("{Directory.Name} (IsSelected={IsSelected}, IsExpanded={IsExpanded})")]
     public class FolderTreeNode : ViewModelBase
@@ -195,9 +202,3 @@ public partial class FolderTree : UserControl
         }
     }
 }
-
-public interface ISelectedItemsProvider<T>
-{
-    void SetSelectedItems(T[] items);
-}
-
