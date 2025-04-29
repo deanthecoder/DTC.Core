@@ -51,6 +51,13 @@ public class DialogService : IDialogService
             });
     }
 
+    public IDisposable ShowBusy(string message, ProgressToken progress)
+    {
+        progress.Cancelled += (_, _) => DialogHost.Close(null);
+        DialogHost.Show(new BusyDialog { Progress = progress, Message = message });
+        return new ScopedDialogCloser();
+    }
+
     public async Task<FileInfo> ShowFileOpenAsync(string title, string filterName, string[] filterExtensions)
     {
         var mainWindow = Application.Current?.GetMainWindow();
@@ -127,5 +134,10 @@ public class DialogService : IDialogService
                 .StorageProvider
                 .OpenFolderPickerAsync(options);
         return folder.FirstOrDefault()?.ToDirectoryInfo();
+    }
+
+    private class ScopedDialogCloser : IDisposable
+    {
+        public void Dispose() => DialogHost.Close(null);
     }
 }

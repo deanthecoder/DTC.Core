@@ -22,4 +22,5 @@ public interface IDialogService
     Task<FileInfo> ShowFileOpenAsync(string title, string filterName, string[] filterExtensions);
     Task<FileInfo> ShowFileSaveAsync(string title, string defaultFileName, string filterName, string[] filterExtensions);
     Task<DirectoryInfo> SelectFolderAsync(string title, DirectoryInfo defaultFolder = null);
+    IDisposable ShowBusy(string message, ProgressToken progress);
 }

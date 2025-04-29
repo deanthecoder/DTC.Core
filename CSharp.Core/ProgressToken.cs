@@ -11,28 +11,39 @@
 
 using System;
 using CSharp.Core.Extensions;
+using CSharp.Core.ViewModels;
 
 namespace CSharp.Core;
 
-public class ProgressToken
+public class ProgressToken : ViewModelBase
 {
-    private double m_progress;
+    private int m_progress;
+    private bool m_isIndeterminate = true;
+    private bool m_isCancelSupported;
 
-    public event EventHandler ProgressUpdated;
+    public event EventHandler Cancelled;
 
-    public bool IsCancelSupported { get; set; }
+    public bool IsCancelSupported
+    {
+        get => m_isCancelSupported;
+        set => SetField(ref m_isCancelSupported, value);
+    }
+
+    public bool IsIndeterminate
+    {
+        get => m_isIndeterminate;
+        set => SetField(ref m_isIndeterminate, value);
+    }
 
     public bool CancelRequested { get; private set; }
 
-    public double Progress
+    public int Progress
     {
         get => m_progress;
         set
         {
-            if (Math.Abs(m_progress - value) < 0.01)
-                return;
-            m_progress = value.Clamp(0.0, 1.0);
-            ProgressUpdated?.Invoke(this, EventArgs.Empty);
+            if (SetField(ref m_progress, value.Clamp(0, 100)))
+                IsIndeterminate = false;
         }
     }
 
@@ -46,5 +57,6 @@ public class ProgressToken
         if (!IsCancelSupported)
             throw new InvalidOperationException("Cancel is not supported");
         CancelRequested = true;
+        Cancelled?.Invoke(this, EventArgs.Empty);
     }
 }
