@@ -28,4 +28,10 @@
       </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Material.Styles">
+        <HintPath>..\..\..\..\.nuget\packages\material.avalonia\3.10.2\lib\net8.0\Material.Styles.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

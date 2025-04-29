@@ -17,10 +17,12 @@ namespace CSharp.Core;
 public class ProgressToken
 {
     private double m_progress;
-    
+
     public event EventHandler ProgressUpdated;
-    
-    public bool CancelRequested { get; set; }
+
+    public bool IsCancelSupported { get; set; }
+
+    public bool CancelRequested { get; private set; }
 
     public double Progress
     {
@@ -32,5 +34,17 @@ public class ProgressToken
             m_progress = value.Clamp(0.0, 1.0);
             ProgressUpdated?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public ProgressToken(bool isCancelSupported = false)
+    {
+        IsCancelSupported = isCancelSupported;
+    }
+
+    public void Cancel()
+    {
+        if (!IsCancelSupported)
+            throw new InvalidOperationException("Cancel is not supported");
+        CancelRequested = true;
     }
 }
