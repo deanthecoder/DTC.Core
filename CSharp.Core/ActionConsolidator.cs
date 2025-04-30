@@ -28,16 +28,18 @@ namespace CSharp.Core;
 ///   executed if no further requests are received.
 /// This class is thread-safe, ensuring proper behavior even when accessed from multiple threads.
 /// </remarks>
-public class ActionConsolidator : IDisposable
+public sealed class ActionConsolidator : IDisposable
 {
     private readonly Action m_action;
     private readonly Timer m_timer;
     private readonly object m_lock = new object();
     private DateTime? m_lastInvokeTime;
+    private readonly TimeSpan m_debounceTime;
 
-    public ActionConsolidator(Action action)
+    public ActionConsolidator(Action action, double debounceSecs = 0.1)
     {
         m_action = action;
+        m_debounceTime = TimeSpan.FromSeconds(debounceSecs);
         m_timer = new Timer(_ => InvokeNow(), null, Timeout.Infinite, Timeout.Infinite);
     }
 
@@ -45,15 +47,15 @@ public class ActionConsolidator : IDisposable
     {
         lock (m_lock)
         {
-            if (m_lastInvokeTime == null || DateTime.Now - m_lastInvokeTime > TimeSpan.FromSeconds(0.1))
+            if (m_lastInvokeTime == null || DateTime.Now - m_lastInvokeTime > m_debounceTime)
             {
                 // Directly invoke if enough time has elapsed or this is the first request.
                 InvokeNow();
             }
             else
             {
-                // Reset the timer for the last invoke.
-                m_timer.Change(TimeSpan.FromSeconds(0.2), Timeout.InfiniteTimeSpan);
+                // Reset the timer for the scheduled invoke.
+                m_timer.Change(m_debounceTime, Timeout.InfiniteTimeSpan);
             }
         }
     }

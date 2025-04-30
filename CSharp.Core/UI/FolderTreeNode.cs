@@ -8,6 +8,8 @@
 // about your modifications. Your contributions are valued!
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -26,7 +28,9 @@ public class FolderTreeNode : ViewModelBase
     private bool? m_isSelected = false;
 
     private FolderTreeNode Parent { get; init; }
-        
+
+    public event EventHandler SelectionChanged;
+    
     public ObservableCollection<FolderTreeNode> SubFolders { get; } = [];
 
     public bool? IsSelected
@@ -57,6 +61,11 @@ public class FolderTreeNode : ViewModelBase
                     parent.SetField(ref parent.m_isSelected, false);
                 else if (mixedChildren)
                     parent.SetField(ref parent.m_isSelected, null);
+                
+                // Allow root node to send a change event.
+                if (parent.Parent == null)
+                    parent.SelectionChanged?.Invoke(this, EventArgs.Empty);
+                
                 parent = parent.Parent;
             }
         }

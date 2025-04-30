@@ -17,8 +17,27 @@ namespace CSharp.Core.UI;
 
 public class FolderTreeRoot
 {
+    private FolderTreeNode m_rootNode;
+    
+    public event EventHandler SelectionChanged;
+    
     [NotNull] public DirectoryInfo Root { get; }
-    public FolderTreeNode RootNode { get; set; }
+
+    public FolderTreeNode RootNode
+    {
+        get => m_rootNode;
+        set
+        {
+            if (m_rootNode == value)
+                return;
+            if (m_rootNode != null)
+                m_rootNode.SelectionChanged -= OnSelectionChanged;
+            m_rootNode = value;
+            if (m_rootNode != null)
+                m_rootNode.SelectionChanged += OnSelectionChanged;
+            SelectionChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     public FolderTreeRoot([NotNull] DirectoryInfo root)
     {
@@ -26,5 +45,8 @@ public class FolderTreeRoot
     }
 
     public IEnumerable<DirectoryInfo> GetSelectedItems() =>
-        RootNode.GetAllSelectedItems();
+        RootNode?.GetAllSelectedItems() ?? Array.Empty<DirectoryInfo>();
+
+    private void OnSelectionChanged(object sender, EventArgs e) =>
+        SelectionChanged?.Invoke(this, e);
 }
