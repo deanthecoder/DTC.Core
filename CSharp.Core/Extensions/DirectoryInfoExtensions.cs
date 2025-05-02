@@ -48,9 +48,22 @@ public static class DirectoryInfoExtensions
         return !info.Exists();
     }
     
+    public static bool IsAccessible(this DirectoryInfo directory)
+    {
+        try
+        {
+            _ = directory.EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    
     public static DirectoryInfo[] TryGetDirs(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (info?.Exists() != true)
+        if (info?.Exists() != true || !info.IsAccessible())
             return [];
 
         var pending = new Queue<DirectoryInfo>();
@@ -60,37 +73,28 @@ public static class DirectoryInfoExtensions
         while (pending.Count > 0)
         {
             var current = pending.Dequeue();
-            try
+            foreach (var dir in current.EnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly).Where(o => o.IsAccessible()))
             {
-                foreach (var dir in current.EnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly))
-                {
-                    try
-                    {
-                        _ = dir.Attributes;
-                        results.Add(dir);
-                        if (searchOption == SearchOption.AllDirectories)
-                            pending.Enqueue(dir);
-                    }
-                    catch
-                    {
-                        // Skip inaccessible subfolder.
-                    }
-                }
-            }
-            catch
-            {
-                // Skip inaccessible directory.
+                results.Add(dir);
+                if (searchOption == SearchOption.AllDirectories)
+                    pending.Enqueue(dir);
             }
         }
 
         return results.ToArray();
     }
+    
+    public static FileInfo[] TryGetFiles(this DirectoryInfo info, string searchPattern = "*.*", SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+        info
+            .TryGetDirs(searchOption: searchOption)
+            .SelectMany(o => o.GetFiles(searchPattern))
+            .ToArray();
 
     public static FileSystemInfo[] TryGetContent(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
         try
         {
-            if (info?.Exists() == true)
+            if (info?.Exists() == true && info.IsAccessible())
                 return info.GetFileSystemInfos(searchPattern, searchOption);
         }
         catch
@@ -110,7 +114,7 @@ public static class DirectoryInfoExtensions
             yield break;
 
         // Skip if the directory is a symlink or doesn't exist.
-        if (info?.Exists() != true || info.IsSymbolicLink())
+        if (info?.Exists() != true || info.IsSymbolicLink() || !info.IsAccessible())
             yield break;
 
         // Offload file enumeration to a background thread
