@@ -16,6 +16,9 @@ using CSharp.Core.Extensions;
 
 namespace CSharp.Core.Converters;
 
+/// <summary>
+/// Converts a byte count to a human-readable bytes/Kb/Mb/etc string.
+/// </summary>
 public class BytesToUiStringConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
