@@ -74,13 +74,13 @@ public class DialogService : IDialogService
                     {
                         Title = title,
                         AllowMultiple = false,
-                        FileTypeFilter = new[]
-                        {
+                        FileTypeFilter =
+                        [
                             new FilePickerFileType(filterName)
                             {
                                 Patterns = filterExtensions
                             }
-                        }
+                        ]
                     });
         return files.FirstOrDefault()?.ToFileInfo();
     }
@@ -103,13 +103,13 @@ public class DialogService : IDialogService
                         ShowOverwritePrompt = true,
                         SuggestedFileName = defaultFileName,
                         DefaultExtension = filterExtensions.FirstOrDefault()?.TrimStart('*'),
-                        FileTypeChoices = new[]
-                        {
+                        FileTypeChoices =
+                        [
                             new FilePickerFileType(filterName)
                             {
                                 Patterns = filterExtensions
                             }
-                        }
+                        ]
                     });
         return file?.ToFileInfo();
     }

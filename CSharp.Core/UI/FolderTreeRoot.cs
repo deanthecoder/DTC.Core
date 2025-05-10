@@ -45,7 +45,7 @@ public class FolderTreeRoot
     }
 
     public IEnumerable<DirectoryInfo> GetSelectedItems() =>
-        RootNode?.GetAllSelectedItems() ?? Array.Empty<DirectoryInfo>();
+        RootNode?.GetAllSelectedItems() ?? [];
 
     private void OnSelectionChanged(object sender, EventArgs e) =>
         SelectionChanged?.Invoke(this, e);

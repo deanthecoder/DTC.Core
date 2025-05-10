@@ -87,6 +87,7 @@ public static class DirectoryInfoExtensions
     public static FileInfo[] TryGetFiles(this DirectoryInfo info, string searchPattern = "*.*", SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
         info
             .TryGetDirs(searchOption: searchOption)
+            .Union([info])
             .SelectMany(o => o.GetFiles(searchPattern))
             .ToArray();
 
@@ -212,7 +213,7 @@ public static class DirectoryInfoExtensions
                 dir = dir.Parent;
         }
 
-        var parts = relative.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        var parts = relative.Split(['\\', '/'], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < parts.Length; i++)
         {
             var part = parts[i];

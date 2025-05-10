@@ -52,7 +52,7 @@ public class FolderTreeNode : ViewModelBase
             var parent = Parent;
             while (parent != null)
             {
-                var mixedChildren = parent.SubFolders.Select(o => o.IsSelected).Distinct().Count() > 1;
+                var mixedChildren = parent.SubFolders.Select(o => o.IsSelected).Distinct().Count() > 1 || parent.SubFolders.Any(o => o.IsSelected == null);
                 var allOn = !mixedChildren && parent.SubFolders.All(o => o.IsSelected == true);
                 var allOff = !allOn && parent.SubFolders.All(o => o.IsSelected == false);
                 if (allOn)
