@@ -19,6 +19,12 @@ namespace DTC.Core.Extensions;
 public static class NumberExtensions
 {
     private static readonly FastNoise Noise = new FastNoise();
+
+    public static bool IsApproximately(this float a, float b) =>
+        MathF.Abs(a - b) < 1e-5f;
+    
+    public static bool IsApproximately(this double a, double b) =>
+        Math.Abs(a - b) < 1e-5;
     
     public static int Clamp(this int f, int min, int max) =>
         Math.Clamp(f, min, max);
