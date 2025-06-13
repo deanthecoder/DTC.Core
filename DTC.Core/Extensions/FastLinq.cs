@@ -301,6 +301,30 @@ public static class FastLinq
         return items.FastSum(selector) / items.Count;
     }
     
+    public static bool FastAll<T>(this IList<T> items, object value)
+    {
+        if (items.Count == 0)
+            throw new InvalidOperationException("Sequence contains no elements.");
+        for (var i = 0; i < items.Count; i++)
+        {
+            if (items[i]?.Equals(value) != true)
+                return false;
+        }
+        return true;
+    }
+    
+    public static bool FastAll<T>(this IList<T> items, Func<T, bool> selector)
+    {
+        if (items.Count == 0)
+            throw new InvalidOperationException("Sequence contains no elements.");
+        for (var i = 0; i < items.Count; i++)
+        {
+            if (!selector(items[i]))
+                return false;
+        }
+        return true;
+    }
+    
     public static T FastFindMin<T>(this IList<T> items, Func<T, int> selector)
     {
         if (items.Count == 0)
