@@ -181,4 +181,16 @@ public static class FileInfoExtensions
         // If at least 90% of the file is printable characters, it's text.
         return printableCount >= byteCount * 0.90;
     }
+    
+    public static void OpenWithDefaultViewer(this FileInfo file)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Process.Start(new ProcessStartInfo(file.FullName) { UseShellExecute = true });
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            Process.Start("open", file.FullName);
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            Process.Start("xdg-open", file.FullName);
+        else
+            throw new NotSupportedException("Unsupported OS platform");
+    }
 }
