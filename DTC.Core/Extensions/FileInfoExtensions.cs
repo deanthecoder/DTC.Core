@@ -89,7 +89,7 @@ public static class FileInfoExtensions
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var extension = info.Extension.ToLowerInvariant();
-            return extension is ".exe" or ".com" or ".msi" or ".bat";
+            return extension is ".exe" or ".com" or ".msi" or ".bat" or ".cmd";
         }
         
         // On macOS or Linux, check if the file has execute permissions.
@@ -149,7 +149,7 @@ public static class FileInfoExtensions
             return false; // Nothing to check for.
         
         // Handle common file extensions.
-        var extensions = ".axaml,.bat,.c,.cpp,.cs,.csv,.csproj,.dotsettings,.gitignore,.glsl,.htm,.html,.ini,.iss,.json,.md,.ps1,.pubxml,.resx,.sh,.sksl,.sln,.txt,.user,.vcxproj,.xaml,.xml.h".Split(',');
+        var extensions = ".axaml,.bat,.cmd,.c,.cpp,.cs,.csv,.csproj,.dotsettings,.gitignore,.glsl,.htm,.html,.ini,.iss,.json,.md,.ps1,.pubxml,.resx,.sh,.sksl,.sln,.txt,.user,.vcxproj,.xaml,.xml.h".Split(',');
         if (extensions.Contains(file.Extension.ToLowerInvariant()))
             return true;
 
