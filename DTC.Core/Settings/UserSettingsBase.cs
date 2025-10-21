@@ -74,6 +74,7 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
         else if (value is JToken token)
         {
             value = token.ToObject<T>();
+            m_state[key] = value;
         }
 
         return (T)value;
