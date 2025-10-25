@@ -1,3 +1,14 @@
+// Code authored by Dean Edis (DeanTheCoder).
+// Anyone is free to copy, modify, use, compile, or distribute this software,
+// either in source code form or as a compiled binary, for any non-commercial
+// purpose.
+//
+// If you modify the code, please retain this copyright header,
+// and consider contributing back to the repository or letting us know
+// about your modifications. Your contributions are valued!
+//
+// THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
+
 using System;
 using System.IO;
 using System.Linq;
@@ -11,6 +22,9 @@ using Markdig.Syntax.Inlines;
 
 namespace DTC.Core.Markdown;
 
+/// <summary>
+/// Markdig-compatible renderer, targetting output to the Console.
+/// </summary>
 public class ConsoleRenderer : NormalizeRenderer
 {
     [NotNull] private readonly StringWriter m_writer;
@@ -59,7 +73,7 @@ public class ConsoleRenderer : NormalizeRenderer
             
             var heading = (HeadingBlock) obj;
             var applyBold = heading.Level == 1;
-            var applyUnderline = heading.Level == 1 ||  heading.Level == 2;
+            var applyUnderline = heading.Level == 1 || heading.Level == 2;
 
             var styles = ConsoleFormatter.Style.Highlight;
             if (applyBold)
@@ -87,12 +101,11 @@ public class ConsoleRenderer : NormalizeRenderer
         if (source.Length == 0)
             return; // Nothing to do.
 
-        var charsAvailable = Math.Min(4, source.Length);
         var newLines = 0;
-        for (var i = 0; i < charsAvailable; i++)
+        for (var i = 0; i < source.Length; i++)
         {
             var ch = source[source.Length - 1 - i];
-            if (ch == '\r')
+            if (ch == '\r' || ch == ' ')
                 continue; // Ignore.
             if (ch == '\n')
             {

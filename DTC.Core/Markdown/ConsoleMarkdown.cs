@@ -17,6 +17,10 @@ namespace DTC.Core.Markdown;
 
 public class ConsoleMarkdown
 {
+    /// <summary>
+    /// Write the specified Markdown string to the Console.
+    /// </summary>
+    /// <param name="md"></param>
     public void Write(string md)
     {
         using var writer = new StringWriter();
