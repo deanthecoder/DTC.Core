@@ -23,6 +23,9 @@ The core components of this library include:
 - **Converters**:  
   Includes converters like `FileInfoToLeafNameConverter` and `MarkdownToInlinesConverter` that are designed to simplify UI bindings in Avalonia applications.
 
+- **Markdown**:  
+  The `DTC.Core.Markdown` namespace exposes `ConsoleMarkdown.Write(...)`, which allows Markdown to be written into a stream suitable for reading in the text console.
+
 - **Extensions**:  
   Provides extension methods for core .NET types such as `StringExtensions`, `FileInfoExtensions`, and `EnumerableExtensions` to make common operations more concise and readable.
 
