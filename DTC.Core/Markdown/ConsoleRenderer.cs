@@ -27,13 +27,14 @@ namespace DTC.Core.Markdown;
 /// </summary>
 public class ConsoleRenderer : NormalizeRenderer
 {
-    [NotNull] private readonly StringWriter m_writer;
+    private readonly StringWriter m_writer;
     private readonly ConsoleFormatter m_formatter;
 
     public ConsoleRenderer([NotNull] StringWriter writer) : base(writer)
     {
         m_writer = writer;
         m_formatter = new ConsoleFormatter(this);
+        
         ReplaceRenderer(typeof(HeadingBlock), () => new ConsoleHeadingRenderer(m_formatter));
         ReplaceRenderer(typeof(CodeInline), () => new ConsoleCodeInlineRenderer(m_formatter));
         ReplaceRenderer(typeof(CodeBlock), () => new ConsoleCodeBlockRenderer(m_formatter));
