@@ -29,7 +29,7 @@ public static class ByteExtensions
     public static bool IsBitSet(this byte b, byte i)
     {
         Debug.Assert(i <= 7, "Index out of range.");
-        return (b & 1 << i) != 0;
+        return (b & (1 << i)) != 0;
     }
 
     public static byte ResetBit(this byte b, byte i)
@@ -42,6 +42,24 @@ public static class ByteExtensions
     public static byte SetBit(this byte b, byte i)
     {
         Debug.Assert(i <= 7, "Index out of range.");
-        return (byte)(b | 1 << i);
+        return (byte)(b | (1 << i));
+    }
+    
+    /// <summary>
+    /// Reverses the order of bits in a byte.
+    /// </summary>
+    /// <returns>A new byte with reversed bit order.</returns>
+    /// <example>
+    /// <code>
+    /// byte value = 0b10110001;  // 177 decimal
+    /// byte mirrored = value.Mirror();  // Returns 0b10001101 (141 decimal)
+    /// </code>
+    /// </example>
+    public static byte Mirror(this byte bits)
+    {
+        bits = (byte)((bits & 0xF0) >> 4 | (bits & 0x0F) << 4);
+        bits = (byte)((bits & 0xCC) >> 2 | (bits & 0x33) << 2);
+        bits = (byte)((bits & 0xAA) >> 1 | (bits & 0x55) << 1);
+        return bits;
     }
 }
