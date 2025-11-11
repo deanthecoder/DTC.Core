@@ -9,7 +9,9 @@
 //
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
+using System;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using K4os.Compression.LZ4;
 
@@ -25,6 +27,12 @@ public static class ByteExtensions
 
     public static string DecompressToString(this byte[] input) =>
         Encoding.UTF8.GetString(Decompress(input));
+
+    public static string GetMd5Hex(this byte[] data)
+    {
+        var hash = MD5.HashData(data);
+        return BitConverter.ToString(hash).Replace("-", string.Empty);
+    }
 
     public static bool IsBitSet(this byte b, byte i)
     {
