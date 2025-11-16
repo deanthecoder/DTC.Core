@@ -156,7 +156,7 @@ public partial class ConsoleFormatter
             if (handle == IntPtr.Zero || handle == new IntPtr(-1))
                 return false;
 
-            if (!GetConsoleMode(handle, out uint mode))
+            if (!GetConsoleMode(handle, out var mode))
                 return false;
 
             const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
