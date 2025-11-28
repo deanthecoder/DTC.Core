@@ -21,6 +21,7 @@ namespace DTC.Core;
 public class Logger
 {
     private readonly FileInfo m_filePath = Assembly.GetEntryAssembly().GetAppSettingsPath().GetFile("log.txt");
+    private readonly object m_lock = new();
     
     public enum Severity
     {
@@ -84,20 +85,29 @@ public class Logger
 
     public void Info(string message)
     {
-        LogMessage(ConsoleColor.White, "Info: ", message);
-        Logged?.Invoke(this, (Severity.Info, message));
+        lock (m_lock)
+        {
+            LogMessage(ConsoleColor.White, "Info: ", message);
+            Logged?.Invoke(this, (Severity.Info, message));
+        }
     }
     
     public void Warn(string message)
     {
-        LogMessage(ConsoleColor.DarkYellow, "Warn: ", message);
-        Logged?.Invoke(this, (Severity.Warning, message));
+        lock (m_lock)
+        {
+            LogMessage(ConsoleColor.DarkYellow, "Warn: ", message);
+            Logged?.Invoke(this, (Severity.Warning, message));
+        }
     }
     
     public void Error(string message)
     {
-        LogMessage(ConsoleColor.DarkRed, "Error: ", message);
-        Logged?.Invoke(this, (Severity.Error, message));
+        lock (m_lock)
+        {
+            LogMessage(ConsoleColor.DarkRed, "Error: ", message);
+            Logged?.Invoke(this, (Severity.Error, message));
+        }
     }
 
     public void Exception(string message, Exception exception, bool includeInnerExceptions = true)
