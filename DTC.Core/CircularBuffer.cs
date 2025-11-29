@@ -49,6 +49,12 @@ public class CircularBuffer<T> : IEnumerable<T>
             m_count++;
     }
 
+    public void Write(ReadOnlySpan<T> items)
+    {
+        foreach (var item in items)
+            Write(item);
+    }
+
     public T Read()
     {
         if (m_count == 0)
@@ -59,6 +65,27 @@ public class CircularBuffer<T> : IEnumerable<T>
         m_count--;
 
         return item;
+    }
+
+    public int Read(Span<T> destination)
+    {
+        var toRead = Math.Min(destination.Length, m_count);
+        for (var i = 0; i < toRead; i++)
+        {
+            destination[i] = m_buffer[(m_tail + i) % Capacity];
+        }
+
+        m_tail = (m_tail + toRead) % Capacity;
+        m_count -= toRead;
+
+        return toRead;
+    }
+
+    public void Clear()
+    {
+        m_head = 0;
+        m_tail = 0;
+        m_count = 0;
     }
 
     public IEnumerator<T> GetEnumerator()
