@@ -184,12 +184,13 @@ public static class FileInfoExtensions
     
     public static void OpenWithDefaultViewer(this FileInfo file)
     {
+        var fileName = $"\"{file.FullName}\"";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            Process.Start(new ProcessStartInfo(file.FullName) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(fileName) { UseShellExecute = true });
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            Process.Start("open", file.FullName);
+            Process.Start("open", fileName);
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            Process.Start("xdg-open", file.FullName);
+            Process.Start("xdg-open", fileName);
         else
             throw new NotSupportedException("Unsupported OS platform");
     }
