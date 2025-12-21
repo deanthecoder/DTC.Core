@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System;
 
 namespace DTC.Core.Extensions;
 
@@ -59,4 +60,40 @@ public static class StringExtensions
 
     public static byte[] Compress(this string s) =>
         Encoding.UTF8.GetBytes(s).Compress();
+
+    /// <summary>
+    /// Compute a deterministic 64-bit FNV-1a hash for the string's UTF-16 code units.
+    /// </summary>
+    /// <remarks>
+    /// This is intended for fast, stable hashing (not cryptographic use).
+    /// </remarks>
+    public static ulong Fnv1a64(this string s) =>
+        s == null ? 0UL : Fnv1a64(s.AsSpan());
+
+    /// <summary>
+    /// Compute a deterministic 64-bit FNV-1a hash for the span's UTF-16 code units.
+    /// </summary>
+    /// <remarks>
+    /// This is intended for fast, stable hashing (not cryptographic use).
+    /// </remarks>
+    public static ulong Fnv1a64(this ReadOnlySpan<char> s)
+    {
+        const ulong offsetBasis = 14695981039346656037UL;
+        const ulong prime = 1099511628211UL;
+
+        unchecked
+        {
+            var hash = offsetBasis;
+            for (var i = 0; i < s.Length; i++)
+            {
+                var ch = (ushort)s[i];
+                hash ^= (byte)ch;
+                hash *= prime;
+                hash ^= (byte)(ch >> 8);
+                hash *= prime;
+            }
+
+            return hash;
+        }
+    }
 }
