@@ -61,7 +61,11 @@ public static class DirectoryInfoExtensions
         }
     }
     
-    public static DirectoryInfo[] TryGetDirs(this DirectoryInfo info, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+    public static DirectoryInfo[] TryGetDirs(
+        this DirectoryInfo info,
+        string searchPattern = "*",
+        SearchOption searchOption = SearchOption.TopDirectoryOnly,
+        Func<DirectoryInfo, bool> includeDirectory = null)
     {
         if (info?.Exists() != true || !info.IsAccessible())
             return [];
@@ -73,7 +77,10 @@ public static class DirectoryInfoExtensions
         while (pending.Count > 0)
         {
             var current = pending.Dequeue();
-            foreach (var dir in current.EnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly).Where(o => o.IsAccessible()))
+            foreach (var dir in
+                     current.EnumerateDirectories(searchPattern, SearchOption.TopDirectoryOnly)
+                         .Where(o => o.IsAccessible())
+                         .Where(o => includeDirectory?.Invoke(o) ?? true))
             {
                 results.Add(dir);
                 if (searchOption == SearchOption.AllDirectories)
@@ -84,9 +91,13 @@ public static class DirectoryInfoExtensions
         return results.ToArray();
     }
     
-    public static FileInfo[] TryGetFiles(this DirectoryInfo info, string searchPattern = "*.*", SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
+    public static FileInfo[] TryGetFiles(
+        this DirectoryInfo info,
+        string searchPattern = "*.*",
+        SearchOption searchOption = SearchOption.TopDirectoryOnly,
+        Func<DirectoryInfo, bool> includeDirectory = null) =>
         info
-            .TryGetDirs(searchOption: searchOption)
+            .TryGetDirs(searchOption: searchOption, includeDirectory: includeDirectory)
             .Union([info])
             .SelectMany(o => o.GetFiles(searchPattern))
             .ToArray();
