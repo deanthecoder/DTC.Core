@@ -71,6 +71,19 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
                 m_state[key] = value;
             }
         }
+        else if (typeof(T).IsEnum)
+        {
+            if (value is string s)
+            {
+                value = Enum.Parse(typeof(T), s);
+                m_state[key] = value;
+            }
+            else if (value is IConvertible)
+            {
+                value = Enum.ToObject(typeof(T), value);
+                m_state[key] = value;
+            }
+        }
         else if (value is JToken token)
         {
             value = token.ToObject<T>();
