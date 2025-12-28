@@ -89,14 +89,12 @@ public static class NumberExtensions
     /// <summary>
     /// Smooth noise function that returns value between 0.0 and 1.0.
     /// </summary>
-    public static double SmoothNoise(this double f) =>
-        SmoothNoise((f, 1.0));
+    public static double SmoothNoise(this double f) => (f, 1.0).SmoothNoise();
 
     /// <summary>
     /// Smooth noise function that returns value between 0.0 and 1.0.
     /// </summary>
-    public static float SmoothNoise(this float f) =>
-        SmoothNoise((f, 1.0f));
+    public static float SmoothNoise(this float f) => (f, 1.0f).SmoothNoise();
 
     /// <summary>
     /// Computes the cross product of two 2D vectors.

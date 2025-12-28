@@ -67,8 +67,9 @@ public static class StringExtensions
     /// <remarks>
     /// This is intended for fast, stable hashing (not cryptographic use).
     /// </remarks>
+    // ReSharper disable once InconsistentNaming
     public static ulong Fnv1a64(this string s) =>
-        s == null ? 0UL : Fnv1a64(s.AsSpan());
+        s == null ? 0UL : s.AsSpan().Fnv1a64();
 
     /// <summary>
     /// Compute a deterministic 64-bit FNV-1a hash for the span's UTF-16 code units.
@@ -76,6 +77,7 @@ public static class StringExtensions
     /// <remarks>
     /// This is intended for fast, stable hashing (not cryptographic use).
     /// </remarks>
+    // ReSharper disable once InconsistentNaming
     public static ulong Fnv1a64(this ReadOnlySpan<char> s)
     {
         const ulong offsetBasis = 14695981039346656037UL;

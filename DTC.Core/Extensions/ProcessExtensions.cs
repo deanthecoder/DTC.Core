@@ -14,8 +14,6 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace DTC.Core.Extensions;
 
 /// <summary>
@@ -28,7 +26,7 @@ public static class ProcessExtensions
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="startInfo"/> is null.</exception>
     /// <exception cref="TimeoutException">Thrown when the process fails to exit within <paramref name="timeout"/>.</exception>
-    public static ProcessCaptureResult? RunAndCaptureOutput(this ProcessStartInfo startInfo, TimeSpan? timeout = null)
+    public static ProcessCaptureResult RunAndCaptureOutput(this ProcessStartInfo startInfo, TimeSpan? timeout = null)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 

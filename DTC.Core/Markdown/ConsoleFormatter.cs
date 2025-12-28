@@ -40,7 +40,7 @@ public partial class ConsoleFormatter
     }
     
     // P/Invoke
-    private const int STD_OUTPUT_HANDLE = -11;
+    private const int StdOutputHandle = -11;
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GetStdHandle(int nStdHandle);
@@ -152,16 +152,15 @@ public partial class ConsoleFormatter
     {
         try
         {
-            var handle = GetStdHandle(STD_OUTPUT_HANDLE);
+            var handle = GetStdHandle(StdOutputHandle);
             if (handle == IntPtr.Zero || handle == new IntPtr(-1))
                 return false;
 
             if (!GetConsoleMode(handle, out var mode))
                 return false;
 
-            const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-
-            var desired = mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            const uint enableVirtualTerminalProcessing = 0x0004;
+            var desired = mode | enableVirtualTerminalProcessing;
             return SetConsoleMode(handle, desired);
         }
         catch

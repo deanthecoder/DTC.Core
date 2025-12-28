@@ -26,7 +26,7 @@ public static class ByteExtensions
         LZ4Pickler.Unpickle(input);
 
     public static string DecompressToString(this byte[] input) =>
-        Encoding.UTF8.GetString(Decompress(input));
+        Encoding.UTF8.GetString(input.Decompress());
 
     public static string GetMd5Hex(this byte[] data)
     {
