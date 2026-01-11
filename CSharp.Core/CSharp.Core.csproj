@@ -22,6 +22,14 @@
         <DependentUpon>MessageDialog.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="UI/AboutDialog.axaml.cs">
+        <DependentUpon>AboutDialog.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="UI/AboutDialogContent.axaml.cs">
+        <DependentUpon>AboutDialogContent.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>

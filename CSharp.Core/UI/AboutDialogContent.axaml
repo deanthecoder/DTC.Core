@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CSharp.Core.UI.AboutDialogContent"
+             Background="Transparent"
+             Margin="16">
+    <StackPanel>
+        <StackPanel.Styles>
+            <Style Selector="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+        </StackPanel.Styles>
+
+        <Image Source="{Binding AboutInfo.Icon, RelativeSource={RelativeSource AncestorType=UserControl}}"
+               Width="90" Height="90" Margin="16,0,16,16" />
+
+        <TextBlock Text="{Binding AboutInfo.Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   FontSize="30" />
+
+        <TextBlock Text="{Binding AboutInfo.Version, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat=Version {0}}"
+                   FontSize="12" />
+        <TextBlock Text="{Binding AboutInfo.Copyright, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Margin="0,16,0,0" />
+        <TextBlock Text="All rights reserved." Margin="4" />
+
+        <TextBlock Text="{Binding AboutInfo.WebsiteUrl, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Margin="0,8,0,0"
+                   Foreground="SkyBlue"
+                   TextDecorations="Underline"
+                   Cursor="Hand"
+                   PointerPressed="OnWebsiteLinkPressed" />
+    </StackPanel>
+</UserControl>
