@@ -19,17 +19,23 @@ public class TempFile : IDisposable
 {
     private readonly FileInfo m_tempObj;
     
-    public TempFile(string ext = ".tmp")
+    public TempFile(string ext = ".tmp") : this(Path.GetTempPath().ToDir().GetFile($"{Guid.NewGuid():N}{ext}"))
     {
-        m_tempObj = Path.GetTempPath().ToDir().GetFile($"{Guid.NewGuid():N}{ext}");
+    }
+
+    public TempFile(FileInfo file)
+    {
+        m_tempObj = file;
     }
 
     public static implicit operator FileInfo(TempFile tempFile) =>
         tempFile.m_tempObj;
+
     public static implicit operator string(TempFile tempFile) =>
         tempFile.FullName;
 
     public string Name => m_tempObj.Name;
+
     public string FullName => m_tempObj.FullName;
 
     public void Dispose() => m_tempObj.TryDelete();

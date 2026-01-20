@@ -194,4 +194,7 @@ public static class FileInfoExtensions
         else
             throw new NotSupportedException("Unsupported OS platform");
     }
+
+    public static TempFile AsTempFile(this FileInfo file) =>
+        new TempFile(file);
 }
