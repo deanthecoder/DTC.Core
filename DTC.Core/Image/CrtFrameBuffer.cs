@@ -191,9 +191,9 @@ public sealed class CrtFrameBuffer
                 }
 
                 var src = sampleY * inputStride + sampleX * BytesPerPixel;
-                var b = (float)source[src];
+                var r = (float)source[src];
                 var g = (float)source[src + 1];
-                var r = (float)source[src + 2];
+                var b = (float)source[src + 2];
 
                 if (IsPaused)
                 {
@@ -281,9 +281,9 @@ public sealed class CrtFrameBuffer
             for (var x = 0; x < m_inputWidth; x++)
             {
                 var src = inputRow + x * BytesPerPixel;
-                var b = ClampToByte(source[src]);
+                var r = ClampToByte(source[src]);
                 var g = ClampToByte(source[src + 1]);
-                var r = ClampToByte(source[src + 2]);
+                var b = ClampToByte(source[src + 2]);
 
                 if (IsPaused)
                 {
