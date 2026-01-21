@@ -11,6 +11,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Markdig;
 
 namespace DTC.Core.Markdown;
@@ -33,7 +34,7 @@ public class ConsoleMarkdown
         Markdig.Markdown.Convert(renderer.Preprocess(md), renderer, pipeline);
 
         var oldEncoding = Console.OutputEncoding;
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
         Console.Write(writer.ToString());
         Console.OutputEncoding = oldEncoding;
     }

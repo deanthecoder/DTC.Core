@@ -8,6 +8,7 @@
 // 
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace DTC.Core;
@@ -97,6 +98,6 @@ public class CircularBuffer<T> : IEnumerable<T>
         }
     }
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() =>
+    IEnumerator IEnumerable.GetEnumerator() =>
         GetEnumerator();
 }
