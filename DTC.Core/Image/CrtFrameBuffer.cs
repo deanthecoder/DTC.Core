@@ -123,14 +123,13 @@ public sealed class CrtFrameBuffer
     /// </summary>
     private void RegenerateGrain()
     {
-        var grain = GrainStrength;
         var invW = OutputWidth > 1 ? 1.0f / (OutputWidth - 1) : 0.0f;
         var invH = OutputHeight > 1 ? 1.0f / (OutputHeight - 1) : 0.0f;
         for (var y = 0; y < OutputHeight; y += Scale)
         {
             for (var x = 0; x < OutputWidth; x += Scale)
             {
-                var value = 1.0f - grain * (float)m_random.NextDouble();
+                var value = 1.0f - GrainStrength * (float)m_random.NextDouble();
                 for (var yy = y; yy < Math.Min(y + Scale, OutputHeight); yy++)
                 {
                     var scanline = yy % Scale == Scale - 1 ? ScanlineMultiplier : 1.0f;

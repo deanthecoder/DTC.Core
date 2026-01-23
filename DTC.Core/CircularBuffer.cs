@@ -23,7 +23,6 @@ public class CircularBuffer<T> : IEnumerable<T>
     private readonly T[] m_buffer;
     private int m_head;
     private int m_tail;
-    private int m_count;
 
     public CircularBuffer(int capacity)
     {
@@ -33,10 +32,11 @@ public class CircularBuffer<T> : IEnumerable<T>
         m_buffer = new T[capacity];
         m_head = 0;
         m_tail = 0;
-        m_count = 0;
+        Count = 0;
     }
 
-    public int Count => m_count;
+    public int Count { get; private set; }
+
     public int Capacity => m_buffer.Length;
 
     public void Write(T item)
@@ -44,10 +44,10 @@ public class CircularBuffer<T> : IEnumerable<T>
         m_buffer[m_head] = item;
         m_head = (m_head + 1) % Capacity;
 
-        if (m_count == Capacity)
+        if (Count == Capacity)
             m_tail = (m_tail + 1) % Capacity;
         else
-            m_count++;
+            Count++;
     }
 
     public void Write(ReadOnlySpan<T> items)
@@ -58,26 +58,26 @@ public class CircularBuffer<T> : IEnumerable<T>
 
     public T Read()
     {
-        if (m_count == 0)
+        if (Count == 0)
             throw new InvalidOperationException("Buffer is empty.");
 
         var item = m_buffer[m_tail];
         m_tail = (m_tail + 1) % Capacity;
-        m_count--;
+        Count--;
 
         return item;
     }
 
     public int Read(Span<T> destination)
     {
-        var toRead = Math.Min(destination.Length, m_count);
+        var toRead = Math.Min(destination.Length, Count);
         for (var i = 0; i < toRead; i++)
         {
             destination[i] = m_buffer[(m_tail + i) % Capacity];
         }
 
         m_tail = (m_tail + toRead) % Capacity;
-        m_count -= toRead;
+        Count -= toRead;
 
         return toRead;
     }
@@ -86,12 +86,12 @@ public class CircularBuffer<T> : IEnumerable<T>
     {
         m_head = 0;
         m_tail = 0;
-        m_count = 0;
+        Count = 0;
     }
 
     public IEnumerator<T> GetEnumerator()
     {
-        for (var i = 0; i < m_count; i++)
+        for (var i = 0; i < Count; i++)
         {
             var index = (m_tail + i) % Capacity;
             yield return m_buffer[index];
