@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace DTC.Core.Image;
 
@@ -25,7 +26,6 @@ public sealed class CrtFrameBuffer
     private const float VignetteMin = 0.7f;
     private const float PhosphorShrink = 0.7f;
     private const float CrtSaturationR = 1.1f;
-    private const float CrtSaturationG = 1.0f;
     private const float CrtSaturationB = 1.1f;
     private const float GrainStrength = 0.04f;
     private const int PauseWidth = 38;
@@ -151,6 +151,8 @@ public sealed class CrtFrameBuffer
     private void RenderAsCrt(byte[] source)
     {
         const float brightness = 3.0f / (1.0f + 2.0f * PhosphorShrink);
+        const float brightnessR = brightness * CrtSaturationR;
+        const float brightnessB = brightness * CrtSaturationB;
         var inputStride = m_inputWidth * BytesPerPixel;
         var outputStride = OutputWidth * BytesPerPixel;
 
@@ -227,40 +229,40 @@ public sealed class CrtFrameBuffer
                     }
                 }
 
-                r *= brightness * CrtSaturationR;
-                g *= brightness * CrtSaturationG;
-                b *= brightness * CrtSaturationB;
+                r *= brightnessR;
+                g *= brightness;
+                b *= brightnessB;
 
-                var outputPixelBase = outputRowBase + x * Scale * BytesPerPixel;
+                // Precompute phosphor-shrunken colors to avoid repeated multiplies.
+                var rPhosphor = r * PhosphorShrink;
+                var gPhosphor = g * PhosphorShrink;
+                var bPhosphor = b * PhosphorShrink;
+
+                var scaledX = x * Scale;
+                var outputPixelBase = outputRowBase + scaledX * BytesPerPixel;
 
                 for (var sy = 0; sy < Scale; sy++)
                 {
                     var outputRow = outputPixelBase + sy * outputStride;
                     var grainRow = m_grain[outputY + sy];
-                    for (var sx = 0; sx < Scale; sx++)
-                    {
-                        var dst = outputRow + sx * BytesPerPixel;
-                        var grain = grainRow[x * Scale + sx];
-                        var phosphorAndGrain = PhosphorShrink * grain;
-                        switch (sx)
-                        {
-                            case 0:
-                                m_output[dst] = ClampToByte(r * grain);
-                                m_output[dst + 1] = ClampToByte(g * phosphorAndGrain);
-                                m_output[dst + 2] = ClampToByte(b * phosphorAndGrain);
-                                break;
-                            case 1:
-                                m_output[dst] = ClampToByte(r * phosphorAndGrain);
-                                m_output[dst + 1] = ClampToByte(g * grain);
-                                m_output[dst + 2] = ClampToByte(b * phosphorAndGrain);
-                                break;
-                            default:
-                                m_output[dst] = ClampToByte(r * phosphorAndGrain);
-                                m_output[dst + 1] = ClampToByte(g * phosphorAndGrain);
-                                m_output[dst + 2] = ClampToByte(b * grain);
-                                break;
-                        }
-                    }
+
+                    var grain0 = grainRow[scaledX];
+                    var dst = outputRow;
+                    m_output[dst] = ClampToByte(r * grain0);
+                    m_output[dst + 1] = ClampToByte(gPhosphor * grain0);
+                    m_output[dst + 2] = ClampToByte(bPhosphor * grain0);
+
+                    var grain1 = grainRow[scaledX + 1];
+                    dst += BytesPerPixel;
+                    m_output[dst] = ClampToByte(rPhosphor * grain1);
+                    m_output[dst + 1] = ClampToByte(g * grain1);
+                    m_output[dst + 2] = ClampToByte(bPhosphor * grain1);
+
+                    var grain2 = grainRow[scaledX + 2];
+                    dst += BytesPerPixel;
+                    m_output[dst] = ClampToByte(rPhosphor * grain2);
+                    m_output[dst + 1] = ClampToByte(gPhosphor * grain2);
+                    m_output[dst + 2] = ClampToByte(b * grain2);
                 }
             }
         }
@@ -280,9 +282,9 @@ public sealed class CrtFrameBuffer
             for (var x = 0; x < m_inputWidth; x++)
             {
                 var src = inputRow + x * BytesPerPixel;
-                var r = ClampToByte(source[src]);
-                var g = ClampToByte(source[src + 1]);
-                var b = ClampToByte(source[src + 2]);
+                var r = source[src];
+                var g = source[src + 1];
+                var b = source[src + 2];
 
                 if (IsPaused)
                 {
@@ -317,11 +319,11 @@ public sealed class CrtFrameBuffer
         }
     }
 
-    private static byte ClampToByte(float value) =>
-        value switch
-        {
-            <= 0.0f => 0,
-            >= 255.0f => 255,
-            _ => (byte)value
-        };
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static byte ClampToByte(float value)
+    {
+        if (value < 0.0f)
+            return 0;
+        return value >= 255.0f ? (byte)255 : (byte)value;
+    }
 }
