@@ -58,11 +58,11 @@ public sealed class RecordingSession : IDisposable
     private Stream m_videoInput;
     private WavFileWriter m_audioWriter;
     private byte[] m_videoBuffer;
-    private int m_bytesPerPixel;
     private int m_expectedRowBytes;
     private int m_frameHeight;
     private int m_frameWidth;
-    private string m_videoPixelFormat;
+    private int m_bytesPerPixel;
+    private string m_inputPixelFormat;
     private Stopwatch m_stopwatch;
     private bool m_isDisposed;
     private volatile bool m_isRecording;
@@ -115,34 +115,16 @@ public sealed class RecordingSession : IDisposable
         if (m_isRecording)
             return;
 
-        using var locked = m_display.Lock();
-        var size = locked.Size;
+        var size = m_display.PixelSize;
         if (size.Width <= 0 || size.Height <= 0)
             throw new InvalidOperationException("Display size is invalid.");
 
         m_frameWidth = size.Width;
         m_frameHeight = size.Height;
-        var format = locked.Format;
-        if (format == PixelFormats.Rgb24)
-        {
-            m_bytesPerPixel = 3;
-            m_videoPixelFormat = "rgb24";
-        }
-        else if (format == PixelFormats.Rgba8888)
-        {
-            m_bytesPerPixel = 4;
-            m_videoPixelFormat = "rgba";
-        }
-        else if (format == PixelFormats.Bgra8888)
-        {
-            m_bytesPerPixel = 4;
-            m_videoPixelFormat = "bgra";
-        }
-        else
-        {
-            throw new NotSupportedException($"Unsupported pixel format: {format}");
-        }
-
+        m_bytesPerPixel = 3;
+        m_inputPixelFormat = "rgb24";
+        if (m_display.Format != PixelFormats.Rgb24)
+            throw new NotSupportedException($"Unsupported pixel format for recording: {m_display.Format}. RGB24 is required.");
         m_expectedRowBytes = m_frameWidth * m_bytesPerPixel;
         m_videoBuffer = new byte[m_expectedRowBytes * m_frameHeight];
 
@@ -228,7 +210,7 @@ public sealed class RecordingSession : IDisposable
             }
             catch
             {
-                // We tried...
+                // Continue.
             }
         }
 
@@ -238,7 +220,7 @@ public sealed class RecordingSession : IDisposable
     private void StartVideoProcess()
     {
         var args =
-            $"-y -f rawvideo -pixel_format {m_videoPixelFormat} -video_size {m_frameWidth}x{m_frameHeight} " +
+            $"-y -f rawvideo -pixel_format {m_inputPixelFormat} -video_size {m_frameWidth}x{m_frameHeight} " +
             $"-framerate {m_frameRate:0.####} -i - -an -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
             $"\"{m_tempVideoFile.FullName}\"";
 
@@ -482,6 +464,8 @@ public sealed class RecordingSession : IDisposable
 
         m_videoInput?.Write(m_videoBuffer, 0, frameBytes);
     }
+
+    // RGB24-only to match emulator output.
 
     private void StopOnError()
     {
