@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using DTC.Core.Extensions;
 
 namespace DTC.Core.Recording;
@@ -60,6 +61,8 @@ public sealed class RecordingSession : IDisposable
     private int m_expectedRowBytes;
     private int m_frameHeight;
     private int m_frameWidth;
+    private int m_bytesPerPixel;
+    private string m_inputPixelFormat;
     private Stopwatch m_stopwatch;
     private bool m_isDisposed;
     private volatile bool m_isRecording;
@@ -118,7 +121,11 @@ public sealed class RecordingSession : IDisposable
 
         m_frameWidth = size.Width;
         m_frameHeight = size.Height;
-        m_expectedRowBytes = m_frameWidth * 4;
+        m_bytesPerPixel = 3;
+        m_inputPixelFormat = "rgb24";
+        if (m_display.Format != PixelFormats.Rgb24)
+            throw new NotSupportedException($"Unsupported pixel format for recording: {m_display.Format}. RGB24 is required.");
+        m_expectedRowBytes = m_frameWidth * m_bytesPerPixel;
         m_videoBuffer = new byte[m_expectedRowBytes * m_frameHeight];
 
         StartVideoProcess();
@@ -203,6 +210,7 @@ public sealed class RecordingSession : IDisposable
             }
             catch
             {
+                // Continue.
             }
         }
 
@@ -212,7 +220,7 @@ public sealed class RecordingSession : IDisposable
     private void StartVideoProcess()
     {
         var args =
-            $"-y -f rawvideo -pixel_format rgba -video_size {m_frameWidth}x{m_frameHeight} " +
+            $"-y -f rawvideo -pixel_format {m_inputPixelFormat} -video_size {m_frameWidth}x{m_frameHeight} " +
             $"-framerate {m_frameRate:0.####} -i - -an -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
             $"\"{m_tempVideoFile.FullName}\"";
 
@@ -338,7 +346,9 @@ public sealed class RecordingSession : IDisposable
             progress.Progress = 0;
         }
 
-        using var process = new Process { StartInfo = muxInfo, EnableRaisingEvents = false };
+        using var process = new Process();
+        process.StartInfo = muxInfo;
+        process.EnableRaisingEvents = false;
         if (!process.Start())
         {
             Logger.Instance.Warn("Failed to start FFmpeg for muxing.");
@@ -454,6 +464,8 @@ public sealed class RecordingSession : IDisposable
 
         m_videoInput?.Write(m_videoBuffer, 0, frameBytes);
     }
+
+    // RGB24-only to match emulator output.
 
     private void StopOnError()
     {
