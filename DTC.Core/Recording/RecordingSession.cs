@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using DTC.Core.Extensions;
 
 namespace DTC.Core.Recording;
@@ -57,9 +58,11 @@ public sealed class RecordingSession : IDisposable
     private Stream m_videoInput;
     private WavFileWriter m_audioWriter;
     private byte[] m_videoBuffer;
+    private int m_bytesPerPixel;
     private int m_expectedRowBytes;
     private int m_frameHeight;
     private int m_frameWidth;
+    private string m_videoPixelFormat;
     private Stopwatch m_stopwatch;
     private bool m_isDisposed;
     private volatile bool m_isRecording;
@@ -112,13 +115,35 @@ public sealed class RecordingSession : IDisposable
         if (m_isRecording)
             return;
 
-        var size = m_display.PixelSize;
+        using var locked = m_display.Lock();
+        var size = locked.Size;
         if (size.Width <= 0 || size.Height <= 0)
             throw new InvalidOperationException("Display size is invalid.");
 
         m_frameWidth = size.Width;
         m_frameHeight = size.Height;
-        m_expectedRowBytes = m_frameWidth * 4;
+        var format = locked.Format;
+        if (format == PixelFormats.Rgb24)
+        {
+            m_bytesPerPixel = 3;
+            m_videoPixelFormat = "rgb24";
+        }
+        else if (format == PixelFormats.Rgba8888)
+        {
+            m_bytesPerPixel = 4;
+            m_videoPixelFormat = "rgba";
+        }
+        else if (format == PixelFormats.Bgra8888)
+        {
+            m_bytesPerPixel = 4;
+            m_videoPixelFormat = "bgra";
+        }
+        else
+        {
+            throw new NotSupportedException($"Unsupported pixel format: {format}");
+        }
+
+        m_expectedRowBytes = m_frameWidth * m_bytesPerPixel;
         m_videoBuffer = new byte[m_expectedRowBytes * m_frameHeight];
 
         StartVideoProcess();
@@ -213,7 +238,7 @@ public sealed class RecordingSession : IDisposable
     private void StartVideoProcess()
     {
         var args =
-            $"-y -f rawvideo -pixel_format rgba -video_size {m_frameWidth}x{m_frameHeight} " +
+            $"-y -f rawvideo -pixel_format {m_videoPixelFormat} -video_size {m_frameWidth}x{m_frameHeight} " +
             $"-framerate {m_frameRate:0.####} -i - -an -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
             $"\"{m_tempVideoFile.FullName}\"";
 
