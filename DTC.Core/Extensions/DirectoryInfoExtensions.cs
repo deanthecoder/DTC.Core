@@ -126,14 +126,23 @@ public static class DirectoryInfoExtensions
             yield break;
 
         // Skip if the directory is a symlink or doesn't exist.
-        if (info?.Exists() != true || info.IsSymbolicLink() || !info.IsAccessible())
+        if (info?.Exists() != true || info.IsSymbolicLink())
             yield break;
 
-        // Offload file enumeration to a background thread
-        FileSystemInfo[] entries;
+        // Use built-in EnumerateFileSystemInfos for better performance with AllDirectories
+        IEnumerable<FileSystemInfo> entries;
         try
         {
-            entries = await Task.Run(() => info.GetFileSystemInfos(fileSearchPattern));
+            var options = new EnumerationOptions
+            {
+                RecurseSubdirectories = searchOption == SearchOption.AllDirectories,
+                IgnoreInaccessible = true,
+                AttributesToSkip = FileAttributes.System
+            };
+
+            entries = await Task.Run(() => info.EnumerateFileSystemInfos(fileSearchPattern, options)
+                .Where(e => !(e is DirectoryInfo dir && dir.IsSymbolicLink()))
+                .ToArray());
         }
         catch
         {
@@ -141,26 +150,10 @@ public static class DirectoryInfoExtensions
         }
 
         foreach (var entry in entries)
+        {
+            if (isCancelRequested?.Invoke() ?? false)
+                yield break;
             yield return entry;
-
-        if (searchOption == SearchOption.TopDirectoryOnly)
-            yield break;
-
-        // Recursively process subdirectories
-        IEnumerable<DirectoryInfo> subDirectories;
-        try
-        {
-            subDirectories = info.GetDirectories().Where(o => !o.IsSymbolicLink()).ToArray();
-        }
-        catch
-        {
-            yield break; // Skip inaccessible directories
-        }
-
-        foreach (var subDirectory in subDirectories)
-        {
-            await foreach (var subEntry in subDirectory.TryGetContentAsync(fileSearchPattern, searchOption, isCancelRequested))
-                yield return subEntry;
         }
     }
     
