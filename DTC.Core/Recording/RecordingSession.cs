@@ -9,8 +9,10 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +48,8 @@ namespace DTC.Core.Recording;
 /// </remarks>
 public sealed class RecordingSession : IDisposable
 {
+    private const string FfmpegExecutableName = "ffmpeg";
+    private static readonly Lazy<string> FfmpegExecutablePath = new(ResolveFfmpegExecutablePath);
     private readonly WriteableBitmap m_display;
     private readonly double m_frameRate;
     private readonly RecordingAudioSettings m_audioSettings;
@@ -65,6 +69,7 @@ public sealed class RecordingSession : IDisposable
     private string m_inputPixelFormat;
     private Stopwatch m_stopwatch;
     private bool m_isDisposed;
+    private bool m_hasAudioSamplesWritten;
     private volatile bool m_isRecording;
 
     public RecordingSession(WriteableBitmap display, double frameRate, RecordingAudioSettings audioSettings = null)
@@ -86,28 +91,14 @@ public sealed class RecordingSession : IDisposable
     public static bool IsFfmpegAvailable(out string reason)
     {
         reason = string.Empty;
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "ffmpeg",
-            Arguments = "-version"
-        };
+        var executable = FfmpegExecutablePath.Value;
+        if (TryProbeFfmpegExecutable(executable, out reason))
+            return true;
 
-        try
-        {
-            var result = startInfo.RunAndCaptureOutput(TimeSpan.FromSeconds(2));
-            if (result?.IsSuccess == true)
-                return true;
-
-            reason = string.IsNullOrWhiteSpace(result?.StandardError)
-                ? "FFmpeg did not report a valid version."
-                : result.StandardError;
-            return false;
-        }
-        catch (Exception ex)
-        {
-            reason = ex.Message;
-            return false;
-        }
+        reason = string.IsNullOrWhiteSpace(reason)
+            ? "FFmpeg was not found. Install ffmpeg on your PATH."
+            : reason;
+        return false;
     }
 
     public void Start()
@@ -121,10 +112,7 @@ public sealed class RecordingSession : IDisposable
 
         m_frameWidth = size.Width;
         m_frameHeight = size.Height;
-        m_bytesPerPixel = 3;
-        m_inputPixelFormat = "rgb24";
-        if (m_display.Format != PixelFormats.Rgb24)
-            throw new NotSupportedException($"Unsupported pixel format for recording: {m_display.Format}. RGB24 is required.");
+        ConfigurePixelFormatForRecording(m_display.Format);
         m_expectedRowBytes = m_frameWidth * m_bytesPerPixel;
         m_videoBuffer = new byte[m_expectedRowBytes * m_frameHeight];
 
@@ -133,6 +121,7 @@ public sealed class RecordingSession : IDisposable
             m_audioWriter = new WavFileWriter(m_tempAudioFile, m_audioSettings.SampleRate, m_audioSettings.Channels);
 
         m_stopwatch = Stopwatch.StartNew();
+        m_hasAudioSamplesWritten = false;
         m_isRecording = true;
         Logger.Instance.Info("Recording started.");
     }
@@ -176,7 +165,10 @@ public sealed class RecordingSession : IDisposable
         try
         {
             lock (m_sync)
+            {
                 m_audioWriter?.WriteSamples(samples);
+                m_hasAudioSamplesWritten = true;
+            }
         }
         catch (Exception ex)
         {
@@ -226,7 +218,7 @@ public sealed class RecordingSession : IDisposable
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = "ffmpeg",
+            FileName = FfmpegExecutablePath.Value,
             Arguments = args,
             RedirectStandardInput = true,
             RedirectStandardError = true,
@@ -321,7 +313,13 @@ public sealed class RecordingSession : IDisposable
         if (!m_tempVideoFile.Exists)
             return;
 
-        var hasAudio = m_audioSettings != null && m_tempAudioFile.Exists;
+        var hasAudio = HasRecordedAudioData();
+        if (!hasAudio)
+        {
+            m_tempVideoFile.CopyTo(m_tempOutputFile.FullName, overwrite: true);
+            return;
+        }
+
         var audioPath = hasAudio ? $" -i \"{m_tempAudioFile.FullName}\"" : string.Empty;
         var audioArgs = hasAudio
             ? $" -c:a aac -b:a {m_audioSettings.BitRateKbps}k -shortest"
@@ -331,7 +329,7 @@ public sealed class RecordingSession : IDisposable
 
         var muxInfo = new ProcessStartInfo
         {
-            FileName = "ffmpeg",
+            FileName = FfmpegExecutablePath.Value,
             Arguments = args,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -431,6 +429,18 @@ public sealed class RecordingSession : IDisposable
         return false;
     }
 
+    /// <summary>
+    /// Returns true when valid audio samples were captured for this recording session.
+    /// </summary>
+    private bool HasRecordedAudioData()
+    {
+        if (m_audioSettings == null || !m_hasAudioSamplesWritten)
+            return false;
+
+        m_tempAudioFile.Refresh();
+        return m_tempAudioFile.Exists && m_tempAudioFile.Length > 44;
+    }
+
     private void CleanupIntermediateFiles()
     {
         m_tempVideoFile.TryDelete();
@@ -465,7 +475,34 @@ public sealed class RecordingSession : IDisposable
         m_videoInput?.Write(m_videoBuffer, 0, frameBytes);
     }
 
-    // RGB24-only to match emulator output.
+    private void ConfigurePixelFormatForRecording(PixelFormat? format)
+    {
+        if (!format.HasValue)
+            throw new NotSupportedException("Unsupported pixel format for recording: <null>.");
+
+        var pixelFormat = format.Value;
+        if (pixelFormat == PixelFormats.Rgb24)
+        {
+            m_bytesPerPixel = 3;
+            m_inputPixelFormat = "rgb24";
+            return;
+        }
+        if (pixelFormat == PixelFormats.Rgba8888)
+        {
+            m_bytesPerPixel = 4;
+            m_inputPixelFormat = "rgba";
+            return;
+        }
+        if (pixelFormat == PixelFormats.Bgra8888)
+        {
+            m_bytesPerPixel = 4;
+            m_inputPixelFormat = "bgra";
+            return;
+        }
+
+        throw new NotSupportedException(
+            $"Unsupported pixel format for recording: {pixelFormat}. Supported formats are Rgb24, Rgba8888, and Bgra8888.");
+    }
 
     private void StopOnError()
     {
@@ -485,6 +522,84 @@ public sealed class RecordingSession : IDisposable
 
         public FileInfo TempFile { get; }
         public TimeSpan Duration { get; }
+    }
+
+    /// <summary>
+    /// Resolves a usable FFmpeg executable path across common install locations and platforms.
+    /// </summary>
+    private static string ResolveFfmpegExecutablePath()
+    {
+        var candidates = GetFfmpegCandidatePaths().Where(path => !string.IsNullOrWhiteSpace(path));
+        foreach (var candidate in candidates)
+        {
+            if (TryProbeFfmpegExecutable(candidate, out _))
+                return candidate;
+        }
+
+        return FfmpegExecutableName;
+    }
+
+    private static IEnumerable<string> GetFfmpegCandidatePaths()
+    {
+        yield return FfmpegExecutableName;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            yield return "/opt/homebrew/bin/ffmpeg";
+            yield return "/usr/local/bin/ffmpeg";
+            yield return "/usr/bin/ffmpeg";
+            yield break;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            yield return "ffmpeg.exe";
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (!string.IsNullOrWhiteSpace(programFiles))
+                yield return Path.Combine(programFiles, "ffmpeg", "bin", "ffmpeg.exe");
+            var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+            if (!string.IsNullOrWhiteSpace(programFilesX86))
+                yield return Path.Combine(programFilesX86, "ffmpeg", "bin", "ffmpeg.exe");
+            yield return Path.Combine("C:\\", "ProgramData", "chocolatey", "bin", "ffmpeg.exe");
+            yield break;
+        }
+
+        yield return "/usr/local/bin/ffmpeg";
+        yield return "/usr/bin/ffmpeg";
+        yield return "/snap/bin/ffmpeg";
+    }
+
+    private static bool TryProbeFfmpegExecutable(string executablePath, out string reason)
+    {
+        reason = string.Empty;
+        if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            reason = "FFmpeg executable path is empty.";
+            return false;
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = executablePath,
+            Arguments = "-version"
+        };
+
+        try
+        {
+            var result = startInfo.RunAndCaptureOutput(TimeSpan.FromSeconds(2));
+            if (result?.IsSuccess == true)
+                return true;
+
+            reason = string.IsNullOrWhiteSpace(result?.StandardError)
+                ? $"'{executablePath}' did not report a valid version."
+                : result.StandardError;
+            return false;
+        }
+        catch (Exception ex)
+        {
+            reason = ex.Message;
+            return false;
+        }
     }
 }
 
