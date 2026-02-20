@@ -23,8 +23,8 @@ public static class TgaWriter
     /// <param name="framebuffer">Linear framebuffer.</param>
     /// <param name="width">Image width.</param>
     /// <param name="height">Image height.</param>
-    /// <param name="bpp">Channels per pixel: 1 (gray), 3 (RGB), or 4 (RGBA).</param>
-    public static void Write(FileInfo file, byte[] framebuffer, int width, int height, int bpp)
+    /// <param name="bytesPerPixel">Bytes per pixel: 1 (gray / 8-bit), 3 (RGB / 24-bit), or 4 (RGBA / 32-bit).</param>
+    public static void Write(FileInfo file, byte[] framebuffer, int width, int height, int bytesPerPixel)
     {
         if (file == null)
             throw new ArgumentNullException(nameof(file));
@@ -34,20 +34,20 @@ public static class TgaWriter
             throw new ArgumentOutOfRangeException(nameof(width));
         if (height <= 0)
             throw new ArgumentOutOfRangeException(nameof(height));
-        if (bpp != 1 && bpp != 3 && bpp != 4)
-            throw new ArgumentOutOfRangeException(nameof(bpp), "bpp must be 1, 3 or 4.");
+        if (bytesPerPixel != 1 && bytesPerPixel != 3 && bytesPerPixel != 4)
+            throw new ArgumentOutOfRangeException(nameof(bytesPerPixel), "bytesPerPixel must be 1, 3 or 4.");
 
         var pixelCount = width * height;
-        var expectedSize = pixelCount * bpp;
+        var expectedSize = pixelCount * bytesPerPixel;
         if (framebuffer.Length != expectedSize)
-            throw new ArgumentException($"Framebuffer size {framebuffer.Length} does not match width×height×bpp {expectedSize}.");
+            throw new ArgumentException($"Framebuffer size {framebuffer.Length} does not match width×height×bytesPerPixel {expectedSize}.");
 
         var descriptor = (byte)0x20; // Origin at top-left.
-        if (bpp == 4)
+        if (bytesPerPixel == 4)
             descriptor |= 0x08; // 8 bits of alpha.
 
-        var imageType = (byte)(bpp == 1 ? 11 : 10); // RLE grayscale or RLE truecolour.
-        var pixelSize = bpp == 1 ? 1 : bpp;
+        var imageType = (byte)(bytesPerPixel == 1 ? 11 : 10); // RLE grayscale or RLE truecolour.
+        var pixelSize = bytesPerPixel == 1 ? 1 : bytesPerPixel;
 
         var header = new byte[18];
         header[2] = imageType;
@@ -58,25 +58,25 @@ public static class TgaWriter
         header[16] = (byte)(pixelSize * 8);
         header[17] = descriptor;
 
-        var pixelData = ConvertToTgaOrdering(framebuffer, bpp);
+        var pixelData = ConvertToTgaOrdering(framebuffer, bytesPerPixel);
 
         using var stream = file.Open(FileMode.Create, FileAccess.Write, FileShare.None);
         stream.Write(header, 0, header.Length);
         WriteRle(stream, pixelData, pixelSize);
     }
 
-    private static byte[] ConvertToTgaOrdering(byte[] framebuffer, int bpp)
+    private static byte[] ConvertToTgaOrdering(byte[] framebuffer, int bytesPerPixel)
     {
-        var pixelSize = bpp == 1 ? 1 : bpp;
-        var pixelCount = framebuffer.Length / bpp;
+        var pixelSize = bytesPerPixel == 1 ? 1 : bytesPerPixel;
+        var pixelCount = framebuffer.Length / bytesPerPixel;
         var converted = new byte[pixelCount * pixelSize];
 
         for (var i = 0; i < pixelCount; i++)
         {
-            var src = i * bpp;
+            var src = i * bytesPerPixel;
             var dst = i * pixelSize;
 
-            switch (bpp)
+            switch (bytesPerPixel)
             {
                 case 1:
                     converted[dst] = framebuffer[src];

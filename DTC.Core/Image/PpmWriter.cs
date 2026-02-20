@@ -16,30 +16,30 @@ namespace DTC.Core.Image;
 public static class PpmWriter
 {
     /// <summary>
-    /// Writes an 8-bit grayscale (P5) or 24-bit RGB (P6) PPM image.
+    /// Writes a binary 24-bit RGB (P6) PPM image.
     /// </summary>
     /// <param name="file">The file to write to</param>
     /// <param name="framebuffer">Buffer containing pixel data</param>
     /// <param name="width">Width of image in pixels</param>
     /// <param name="height">Height of image in pixels</param>
-    /// <param name="bpp">Bits per pixel - must be 1 (grayscale) or 3 (RGB)</param> 
+    /// <param name="bytesPerPixel">Bytes per pixel - must be 1 (grayscale / 8-bit) or 3 (RGB / 24-bit)</param>
     /// <remarks>
-    /// If bpp == 1, pixels are expanded to RGB by repeating each value.
+    /// If bytesPerPixel == 1, grayscale source pixels are expanded to RGB triplets.
     /// </remarks>
-    public static void Write(FileInfo file, byte[] framebuffer, int width, int height, int bpp)
+    public static void Write(FileInfo file, byte[] framebuffer, int width, int height, int bytesPerPixel)
     {
         if (file == null)
             throw new ArgumentNullException(nameof(file));
         if (framebuffer == null)
             throw new ArgumentNullException(nameof(framebuffer));
-        if (bpp != 1 && bpp != 3)
-            throw new ArgumentOutOfRangeException(nameof(bpp), "bpp must be 1 or 3.");
+        if (bytesPerPixel != 1 && bytesPerPixel != 3)
+            throw new ArgumentOutOfRangeException(nameof(bytesPerPixel), "bytesPerPixel must be 1 or 3.");
 
-        var expected = width * height * bpp;
+        var expected = width * height * bytesPerPixel;
         if (framebuffer.Length != expected)
-            throw new ArgumentException($"Framebuffer size {framebuffer.Length} does not match width×height×bpp {expected}.");
+            throw new ArgumentException($"Framebuffer size {framebuffer.Length} does not match width×height×bytesPerPixel {expected}.");
 
-        var isColor = bpp == 3;
+        var isColor = bytesPerPixel == 3;
         var header = $"P6\n{width} {height}\n255\n";
         var headerBytes = Encoding.ASCII.GetBytes(header);
 
