@@ -134,4 +134,11 @@ public sealed class FrameBuffer
         for (var i = 0; i < span.Length; i++)
             span[i] = (byte)((span[i] * previousWeight + currentFrame[i] * currentWeight) / totalWeight);
     }
+
+    public FrameBuffer Clone()
+    {
+        var clone = new FrameBuffer(Width, Height, BytesPerPixel);
+        Data.AsSpan().CopyTo(clone.Data);
+        return clone;
+    }
 }
