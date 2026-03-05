@@ -45,4 +45,39 @@ public static class AssemblyExtensions
 
         return appDataPath.ToDir().CreateSubdirectory(assembly.GetProductName().ToSafeFileName());
     }
+
+    public static string GetDisplayVersion(this Assembly assembly)
+    {
+        var informationalVersion = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion;
+        var cleanedInformationalVersion = NormalizeVersionText(informationalVersion);
+        if (!string.IsNullOrWhiteSpace(cleanedInformationalVersion))
+            return cleanedInformationalVersion;
+
+        var fileVersion = assembly
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()?
+            .Version;
+        var cleanedFileVersion = NormalizeVersionText(fileVersion);
+        if (!string.IsNullOrWhiteSpace(cleanedFileVersion))
+            return cleanedFileVersion;
+
+        var assemblyVersion = assembly.GetName().Version;
+        return assemblyVersion == null
+            ? null
+            : $"{assemblyVersion.Major}.{assemblyVersion.Minor}";
+    }
+
+    private static string NormalizeVersionText(string versionText)
+    {
+        if (string.IsNullOrWhiteSpace(versionText))
+            return null;
+
+        var trimmed = versionText.Trim();
+        var plusIndex = trimmed.IndexOf('+');
+        if (plusIndex >= 0)
+            trimmed = trimmed[..plusIndex];
+
+        return Version.TryParse(trimmed, out var parsedVersion) ? $"{parsedVersion.Major}.{parsedVersion.Minor}" : trimmed;
+    }
 }
