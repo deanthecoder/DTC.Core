@@ -15,15 +15,15 @@ namespace DTC.Core;
 
 public static class KeyboardLayoutChecker
 {
-    private static bool? m_cachedResult;
+    private static bool? CachedResult;
     
     [DllImport("user32.dll")]
     private static extern IntPtr GetKeyboardLayout(uint idThread);
 
     public static bool IsUk()
     {
-        if (m_cachedResult != null)
-            return m_cachedResult.Value;
+        if (CachedResult != null)
+            return CachedResult.Value;
         
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -34,14 +34,14 @@ public static class KeyboardLayoutChecker
             var layoutId = (int)keyboardLayout & 0xFFFF;
 
             // Check for UK keyboard layout ID (0x0809)
-            m_cachedResult = layoutId == 0x0809;
+            CachedResult = layoutId == 0x0809;
         }
         else
         {
             // Assume US keyboard for non-Windows machines.
-            m_cachedResult = false;
+            CachedResult = false;
         }
 
-        return m_cachedResult.Value;
+        return CachedResult.Value;
     }
 }
