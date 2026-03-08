@@ -86,7 +86,7 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
         }
         else if (value is JToken token)
         {
-            value = token.ToObject<T>();
+            value = token.ToObject<T>(JsonSerializer.Create(CreateSerializerSettings()));
             m_state[key] = value;
         }
 
