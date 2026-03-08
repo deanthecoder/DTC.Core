@@ -15,6 +15,7 @@ namespace DTC.Core;
 
 public static class KeyboardLayoutChecker
 {
+    // ReSharper disable once InconsistentNaming
     private static bool? CachedResult;
     
     [DllImport("user32.dll")]
