@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -88,6 +89,15 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
         {
             value = token.ToObject<T>(JsonSerializer.Create(CreateSerializerSettings()));
             m_state[key] = value;
+        }
+        else if (value is IConvertible)
+        {
+            var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+            if (targetType.IsPrimitive || targetType == typeof(decimal) || targetType == typeof(DateTime))
+            {
+                value = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+                m_state[key] = value;
+            }
         }
 
         return (T)value;
