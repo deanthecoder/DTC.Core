@@ -22,6 +22,7 @@ using DTC.Core.JsonConverters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+// ReSharper disable VirtualMemberCallInConstructor
 
 namespace DTC.Core.Settings;
 
@@ -36,10 +37,12 @@ namespace DTC.Core.Settings;
 /// </remarks>
 public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
 {
-    private readonly FileInfo m_filePath = Assembly.GetEntryAssembly().GetAppSettingsPath().GetFile("settings.json");
+    private readonly FileInfo m_filePath;
     private readonly Dictionary<string, object> m_state = new Dictionary<string, object>();
 
     public event PropertyChangedEventHandler PropertyChanged;
+
+    protected virtual string SettingsFileName => "settings.json";
 
     protected abstract void ApplyDefaults();
 
@@ -113,6 +116,7 @@ public abstract class UserSettingsBase : INotifyPropertyChanged, IDisposable
 
     protected UserSettingsBase()
     {
+        m_filePath = Assembly.GetEntryAssembly().GetAppSettingsPath().GetFile(SettingsFileName);
         ApplyDefaults();
         if (!m_filePath.Exists)
             return;
