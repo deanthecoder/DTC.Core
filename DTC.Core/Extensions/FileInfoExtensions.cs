@@ -48,6 +48,23 @@ public static class FileInfoExtensions
 
     public static bool Exists(this FileSystemInfo info)
     {
+        ArgumentNullException.ThrowIfNull(info);
+
+        var fullName = info.FullName;
+
+        // UNC path?
+        if (fullName.StartsWith(@"\\", StringComparison.Ordinal))
+        {
+            var parts = fullName.TrimStart('\\').Split('\\', StringSplitOptions.RemoveEmptyEntries);
+
+            // UNC parts are:
+            // [0] = server
+            // [1] = share
+            // [2+] = subfolder/file under the share
+            if (parts.Length < 3)
+                return false;
+        }
+
         info.Refresh();
         return info.Exists;
     }

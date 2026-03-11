@@ -27,6 +27,29 @@ public static class DirectoryInfoExtensions
     public static DirectoryInfo GetDir(this DirectoryInfo info, string name) =>
         Path.Combine(info.FullName, name).ToDir();
 
+    public static bool Exists(this DirectoryInfo directory)
+    {
+        ArgumentNullException.ThrowIfNull(directory);
+
+        var fullName = directory.FullName;
+
+        // UNC path?
+        if (fullName.StartsWith(@"\\", StringComparison.Ordinal))
+        {
+            var parts = fullName.TrimStart('\\').Split('\\', StringSplitOptions.RemoveEmptyEntries);
+
+            // UNC layout:
+            // [0] server
+            // [1] share
+            // [2+] subfolder
+            if (parts.Length < 3)
+                return false;
+        }
+
+        directory.Refresh();
+        return directory.Exists;
+    }
+
     /// <summary>
     /// Attempts to recursively delete the specified directory.
     /// </summary>
