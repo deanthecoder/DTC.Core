@@ -149,32 +149,33 @@ public class NeuralNetwork
         }
     }
 
-    public void CrossWith(NeuralNetwork other, double crossoverRate)
+    public void CrossWith(NeuralNetwork other, double crossoverRate, Random random = null)
     {
+        random ??= Random.Shared;
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
                 {
-                    if (Random.Shared.NextDouble() < crossoverRate)
+                    if (random.NextDouble() < crossoverRate)
                         m_weights[l][j][i] = other.m_weights[l][j][i];
                 }
             }
         }
     }
     
-    public void Mutate(double mutationRate)
+    public void Mutate(double mutationRate, Random random = null)
     {
+        random ??= Random.Shared;
         for (var l = 0; l < m_weights.Length; l++)
         {
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
                 {
-                    var rand = Random.Shared;
-                    if (rand.NextDouble() < mutationRate)
-                        m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + rand.GaussianSample(0.2));
+                    if (random.NextDouble() < mutationRate)
+                        m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + random.GaussianSample(0.2));
                 }
             }
         }
