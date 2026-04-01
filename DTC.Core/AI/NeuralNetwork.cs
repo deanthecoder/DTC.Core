@@ -24,6 +24,7 @@ public class NeuralNetwork
     [JsonProperty] private double[][] m_neurons;
     [JsonProperty] private double[][][] m_weights;
     [JsonProperty] private double m_learningRate;
+    [JsonIgnore] private double[][] m_flatWeights;
 
     /// <summary>
     /// Initializes a new neural network with the given layer sizes and learning rate.
@@ -56,27 +57,97 @@ public class NeuralNetwork
         if (input.Any(o => o < -1.0 || o > 1.0))
             throw new ArgumentException("Input values must be in the range [-1, 1].");
 #endif
-        
+
+        EnsureFlatWeights();
         Array.Copy(input, m_neurons[0], input.Length);
 
         for (var l = 1; l < m_layerSizes.Length; l++)
         {
             var prev = m_neurons[l - 1];
             var current = m_neurons[l];
-            var weights = m_weights[l - 1];
-            for (var j = 0; j < m_layerSizes[l]; j++)
+            var weights = m_flatWeights[l - 1];
+            var prevSize = m_layerSizes[l - 1];
+            var outputSize = m_layerSizes[l];
+            var isOutputLayer = l == m_layerSizes.Length - 1;
+            var weightIndex = 0;
+            for (var j = 0; j < outputSize; j++)
             {
-                var w = weights[j];
                 var sum = 0.0;
-                for (var i = 0; i < m_layerSizes[l - 1]; i++)
-                    sum += prev[i] * w[i];
+                for (var i = 0; i < prevSize; i++)
+                    sum += prev[i] * weights[weightIndex++];
 
-                // Use ReLU activation on hidden layers, identity on output
-                current[j] = l == m_layerSizes.Length - 1 ? sum : ReLu(sum);
+                current[j] = isOutputLayer ? sum : ReLu(sum);
             }
         }
 
         return m_neurons[^1]; // output layer
+    }
+
+    /// <summary>
+    /// Performs a forward pass using multiple fixed-length input segments without flattening them first.
+    /// </summary>
+    public double[] PredictSegmented(double[][] inputSegments, int segmentCount, int segmentLength)
+    {
+#if DEBUG
+        if (segmentCount <= 0 || segmentLength <= 0)
+            throw new ArgumentException("Segment dimensions must be greater than zero.");
+        if (segmentCount * segmentLength != m_layerSizes[0])
+            throw new ArgumentException("Segmented input does not match network input size.");
+        for (var s = 0; s < segmentCount; s++)
+        {
+            if (inputSegments[s] == null || inputSegments[s].Length < segmentLength)
+                throw new ArgumentException("Each input segment must have the declared segment length.");
+            for (var i = 0; i < segmentLength; i++)
+            {
+                var value = inputSegments[s][i];
+                if (value < -1.0 || value > 1.0)
+                    throw new ArgumentException("Input values must be in the range [-1, 1].");
+            }
+        }
+#endif
+
+        EnsureFlatWeights();
+        for (var l = 1; l < m_layerSizes.Length; l++)
+        {
+            var current = m_neurons[l];
+            var weights = m_flatWeights[l - 1];
+            var outputSize = m_layerSizes[l];
+            var isOutputLayer = l == m_layerSizes.Length - 1;
+            if (l == 1)
+            {
+                var weightBase = 0;
+                for (var j = 0; j < outputSize; j++)
+                {
+                    var sum = 0.0;
+                    var segmentWeightIndex = weightBase;
+                    for (var segmentIndex = 0; segmentIndex < segmentCount; segmentIndex++)
+                    {
+                        var segment = inputSegments[segmentIndex];
+                        for (var i = 0; i < segmentLength; i++)
+                            sum += segment[i] * weights[segmentWeightIndex++];
+                    }
+
+                    current[j] = isOutputLayer ? sum : ReLu(sum);
+                    weightBase += segmentCount * segmentLength;
+                }
+
+                continue;
+            }
+
+            var prev = m_neurons[l - 1];
+            var prevSize = m_layerSizes[l - 1];
+            var weightIndex = 0;
+            for (var j = 0; j < outputSize; j++)
+            {
+                var sum = 0.0;
+                for (var i = 0; i < prevSize; i++)
+                    sum += prev[i] * weights[weightIndex++];
+
+                current[j] = isOutputLayer ? sum : ReLu(sum);
+            }
+        }
+
+        return m_neurons[^1];
     }
 
     /// <summary>
@@ -147,6 +218,8 @@ public class NeuralNetwork
                     m_weights[l][j][i] = Random.Shared.NextDouble() * 2 - 1;
             }
         }
+
+        RebuildFlatWeights();
     }
 
     public void CrossWith(NeuralNetwork other, double crossoverRate, Random random = null)
@@ -163,6 +236,8 @@ public class NeuralNetwork
                 }
             }
         }
+
+        RebuildFlatWeights();
     }
     
     public void Mutate(double mutationRate, Random random = null)
@@ -179,6 +254,8 @@ public class NeuralNetwork
                 }
             }
         }
+
+        RebuildFlatWeights();
     }
 
     public NeuralNetwork Clone()
@@ -198,6 +275,35 @@ public class NeuralNetwork
             }
         }
 
+        clone.RebuildFlatWeights();
         return clone;
+    }
+
+    public void RefreshInferenceCaches() => RebuildFlatWeights();
+
+    private void EnsureFlatWeights()
+    {
+        if (m_flatWeights == null || m_flatWeights.Length != m_weights.Length)
+            RebuildFlatWeights();
+    }
+
+    private void RebuildFlatWeights()
+    {
+        m_flatWeights = new double[m_weights.Length][];
+        for (var l = 0; l < m_weights.Length; l++)
+        {
+            var outSize = m_weights[l].Length;
+            var inSize = outSize == 0 ? 0 : m_weights[l][0].Length;
+            var flat = new double[outSize * inSize];
+            var flatIndex = 0;
+            for (var j = 0; j < outSize; j++)
+            {
+                var row = m_weights[l][j];
+                Array.Copy(row, 0, flat, flatIndex, inSize);
+                flatIndex += inSize;
+            }
+
+            m_flatWeights[l] = flat;
+        }
     }
 }
