@@ -51,6 +51,29 @@ public class DialogService : IDialogService
             });
     }
 
+    public async Task<string> ShowTextEntryAsync(
+        string message,
+        string detail,
+        string initialValue = null,
+        string watermark = null,
+        string cancelButton = "Cancel",
+        string actionButton = "OK",
+        MaterialIconKind? icon = MaterialIconKind.Information)
+    {
+        var result =
+            await DialogHost.Show(new TextEntryDialog
+                {
+                    Message = message,
+                    Detail = detail,
+                    InputText = initialValue,
+                    Watermark = watermark,
+                    CancelButton = cancelButton,
+                    ActionButton = actionButton,
+                    Icon = icon
+                });
+        return result as string;
+    }
+
     public IDisposable ShowBusy(string message, ProgressToken progress)
     {
         progress.Cancelled += (_, _) => DialogHost.Close(null);

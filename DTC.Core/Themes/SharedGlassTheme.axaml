@@ -1,5 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
   <Styles.Resources>
     <Color x:Key="Bg0">#070A10</Color>
     <Color x:Key="Bg1">#0B1020</Color>
@@ -34,8 +36,27 @@
     <Setter Property="BoxShadow" Value="0 18 40 0 #40000000" />
   </Style>
 
+  <Style Selector="controls|Card.dialogCard">
+    <Setter Property="Background" Value="#F20E1A2B" />
+    <Setter Property="BorderBrush" Value="#4A6A93C2" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="18" />
+  </Style>
+
+  <Style Selector="materialIcons|MaterialIcon.dialogIcon">
+    <Setter Property="Foreground" Value="#9ED8FF" />
+  </Style>
+
   <Style Selector="TextBlock">
     <Setter Property="Foreground" Value="{StaticResource BrushText0}" />
+  </Style>
+
+  <Style Selector="TextBlock.dialogTitle">
+    <Setter Property="Foreground" Value="#F3FAFF" />
+  </Style>
+
+  <Style Selector="TextBlock.dialogDetail">
+    <Setter Property="Foreground" Value="{StaticResource BrushText1}" />
   </Style>
 
   <Style Selector="TextBlock.launcherEyebrow">
@@ -119,6 +140,55 @@
     <Setter Property="IsVisible" Value="False" />
   </Style>
 
+  <Style Selector="Button">
+    <Setter Property="MinHeight" Value="34" />
+    <Setter Property="Foreground" Value="{StaticResource BrushText0}" />
+    <Setter Property="Background" Value="#0E1A2B" />
+    <Setter Property="BorderBrush" Value="#2A3A60" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button:pointerover">
+    <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}" />
+    <Setter Property="Background" Value="#13243A" />
+  </Style>
+
+  <Style Selector="Button.accent">
+    <Setter Property="Background" Value="{StaticResource BrushAccent}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}" />
+    <Setter Property="Foreground" Value="#081018" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.accent:pointerover">
+    <Setter Property="Background" Value="#5EF0FF" />
+    <Setter Property="BorderBrush" Value="#5EF0FF" />
+  </Style>
+
+  <Style Selector="Button.neon">
+    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="Background" Value="#0E1A2B" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="#2A3A60" />
+  </Style>
+
+  <Style Selector="Button.neon:pointerover">
+    <Setter Property="BorderBrush" Value="{StaticResource BrushAccent}" />
+    <Setter Property="Background" Value="#13243A" />
+  </Style>
+
+  <Style Selector="Button.starButton">
+    <Setter Property="Foreground" Value="#FFD36E" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.starButton:pointerover">
+    <Setter Property="Foreground" Value="#FFE28E" />
+  </Style>
+
   <Style Selector="Border.resultsPanel">
     <Setter Property="Background" Value="#0E1A2B" />
     <Setter Property="BorderBrush" Value="#2A3A60" />
@@ -187,5 +257,12 @@
 
   <Style Selector="MenuItem:pointerover">
     <Setter Property="Background" Value="#1E163148" />
+  </Style>
+
+  <Style Selector="Button.dialogButton">
+    <Setter Property="Foreground" Value="{StaticResource BrushText0}" />
+    <Setter Property="MinWidth" Value="112" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
 </Styles>

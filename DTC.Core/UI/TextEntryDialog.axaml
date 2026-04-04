@@ -6,7 +6,7 @@
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="DTC.Core.UI.MessageDialog"
+             x:Class="DTC.Core.UI.TextEntryDialog"
              x:Name="Self">
     <controls:Card Classes="dialogCard"
                    MinWidth="420">
@@ -15,9 +15,11 @@
             <Grid ColumnDefinitions="Auto,*">
                 <avalonia:MaterialIcon Kind="{Binding Icon, ElementName=Self}"
                                        Classes="dialogIcon"
-                                       Width="48" Height="48" Margin="0,0,16,0"
-                                       IsVisible="{Binding !!Icon, ElementName=Self}"/>
-            
+                                       Width="48"
+                                       Height="48"
+                                       Margin="0,0,16,0"
+                                       IsVisible="{Binding !!Icon, ElementName=Self}" />
+
                 <StackPanel Grid.Column="1"
                             Spacing="10">
                     <!-- ReSharper disable once Xaml.StyleClassNotFound -->
@@ -32,13 +34,25 @@
                 </StackPanel>
             </Grid>
 
-            <UniformGrid Columns="1"
-                         Margin="0,8,0,0"
+            <TextBox Width="420"
+                     Text="{Binding InputText, ElementName=Self, Mode=TwoWay}"
+                     Watermark="{Binding Watermark, ElementName=Self}" />
+
+            <UniformGrid Columns="2"
                          HorizontalAlignment="Right">
-                <Button Content="OK"
+                <Button Content="{Binding CancelButton, ElementName=Self}"
                         Classes="dialogButton"
+                        Margin="0,0,4,0"
                         Theme="{DynamicResource MaterialFlatButton}"
+                        IsCancel="True"
                         Command="{Binding CloseDialogCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHostAvalonia:DialogHost}}" />
+                <Button Content="{Binding ActionButton, ElementName=Self}"
+                        Classes="dialogButton"
+                        Margin="4,0,0,0"
+                        Theme="{DynamicResource MaterialFlatButton}"
+                        IsDefault="True"
+                        Command="{Binding CloseDialogCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHostAvalonia:DialogHost}}"
+                        CommandParameter="{Binding InputText, ElementName=Self}" />
             </UniformGrid>
         </StackPanel>
     </controls:Card>

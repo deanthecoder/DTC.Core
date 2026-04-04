@@ -19,6 +19,7 @@ public interface IDialogService
 {
     void Warn(string message, string detail, string cancelButton, string actionButton, Action<bool> onClose, MaterialIconKind? icon = null);
     void ShowMessage(string message, string detail, MaterialIconKind? icon = MaterialIconKind.Information);
+    Task<string> ShowTextEntryAsync(string message, string detail, string initialValue = null, string watermark = null, string cancelButton = "Cancel", string actionButton = "OK", MaterialIconKind? icon = MaterialIconKind.Information);
     Task<FileInfo> ShowFileOpenAsync(string title, string filterName, string[] filterExtensions);
     Task<FileInfo> ShowFileSaveAsync(string title, string defaultFileName, string filterName, string[] filterExtensions);
     Task<DirectoryInfo> SelectFolderAsync(string title, DirectoryInfo defaultFolder = null);

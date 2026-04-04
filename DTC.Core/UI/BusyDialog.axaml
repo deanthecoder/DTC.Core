@@ -7,8 +7,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              MinWidth="300"
              x:Name="Self">
-    <controls:Card>
-        <StackPanel Margin="16,8">
+    <controls:Card Classes="dialogCard"
+                   MinWidth="360">
+        <StackPanel Margin="16,8"
+                    Spacing="14">
             <Grid ColumnDefinitions="Auto,*">
                 <!-- ReSharper disable once Xaml.StyleClassNotFound -->
                 <ProgressBar Classes="circular"
@@ -18,17 +20,20 @@
 
                 <!-- ReSharper disable once Xaml.StyleClassNotFound -->
                 <TextBlock Grid.Column="1"
-                           Classes="Headline6"
+                           Classes="Headline6 dialogTitle"
                            Text="{Binding Message, ElementName=Self}"
                            HorizontalAlignment="Left" VerticalAlignment="Center" />
             </Grid>
 
-            <Grid Margin="0,8,0,0" HorizontalAlignment="Right"
-                  IsVisible="{Binding Progress.IsCancelSupported, ElementName=Self}">
+            <UniformGrid Columns="1"
+                         Margin="0,8,0,0"
+                         HorizontalAlignment="Right"
+                         IsVisible="{Binding Progress.IsCancelSupported, ElementName=Self}">
                 <Button Content="Cancel"
+                        Classes="dialogButton"
                         Theme="{DynamicResource MaterialFlatButton}"
                         Command="{Binding Progress.Cancel, ElementName=Self}" />
-            </Grid>
+            </UniformGrid>
         </StackPanel>
     </controls:Card>
 </UserControl>
