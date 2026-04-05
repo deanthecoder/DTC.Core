@@ -161,6 +161,16 @@ public class DialogService : IDialogService
 
     private class ScopedDialogCloser : IDisposable
     {
-        public void Dispose() => DialogHost.Close(null);
+        public void Dispose()
+        {
+            try
+            {
+                DialogHost.Close(null);
+            }
+            catch (InvalidOperationException)
+            {
+                // The dialog may already have been closed by the host lifecycle.
+            }
+        }
     }
 }
