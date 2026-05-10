@@ -166,7 +166,7 @@ public static class FileInfoExtensions
             return false; // Nothing to check for.
         
         // Handle common file extensions.
-        var extensions = ".axaml,.bat,.cmd,.c,.cpp,.cs,.csv,.csproj,.dotsettings,.gitignore,.glsl,.htm,.html,.ini,.iss,.json,.md,.ps1,.pubxml,.resx,.sh,.sksl,.sln,.txt,.user,.vcxproj,.xaml,.xml.h".Split(',');
+        var extensions = ".axaml,.bat,.cmd,.c,.cpp,.cs,.csv,.csproj,.dotsettings,.gitignore,.glsl,.htm,.html,.ini,.iss,.json,.md,.ps1,.pubxml,.resx,.sh,.sksl,.sln,.slnx,.txt,.user,.vcxproj,.xaml,.xml.h".Split(',');
         if (extensions.Contains(file.Extension.ToLowerInvariant()))
             return true;
 
