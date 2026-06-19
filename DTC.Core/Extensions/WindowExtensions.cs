@@ -13,11 +13,23 @@ using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 
 namespace DTC.Core.Extensions;
 
 public static class WindowExtensions
 {
+    /// <summary>
+    /// Closes the window after the current UI operation completes.
+    /// </summary>
+    public static void CloseDeferred(this Window window)
+    {
+        if (window == null)
+            return;
+
+        Dispatcher.UIThread.Post(window.Close, DispatcherPriority.Background);
+    }
+
     /// <summary>
     /// Gets the position string of the window in the format "X,Y,Width,Height,ScreenIndex,State".
     /// </summary>
