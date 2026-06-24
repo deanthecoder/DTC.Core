@@ -198,6 +198,31 @@ public class NeuralNetwork
     /// </summary>
     private static double ReLu(double x) => Math.Max(0, x);
 
+    public int LayerCount => m_layerSizes.Length;
+
+    public int GetLayerSize(int layer) =>
+        layer >= 0 && layer < m_layerSizes.Length ? m_layerSizes[layer] : 0;
+
+    public double GetNeuronValue(int layer, int neuron)
+    {
+        if (layer < 0 || layer >= m_neurons.Length || neuron < 0 || neuron >= m_neurons[layer].Length)
+            return 0.0;
+        return m_neurons[layer][neuron];
+    }
+
+    public double GetWeight(int sourceLayer, int sourceNeuron, int targetNeuron)
+    {
+        if (sourceLayer < 0 || sourceLayer >= m_weights.Length)
+            return 0.0;
+        var layerWeights = m_weights[sourceLayer];
+        if (targetNeuron < 0 || targetNeuron >= layerWeights.Length)
+            return 0.0;
+        var neuronWeights = layerWeights[targetNeuron];
+        if (sourceNeuron < 0 || sourceNeuron >= neuronWeights.Length)
+            return 0.0;
+        return neuronWeights[sourceNeuron];
+    }
+
     /// <summary>
     /// Clears neuron states and reinitializes weights with random values.
     /// </summary>
