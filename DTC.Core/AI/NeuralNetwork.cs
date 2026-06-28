@@ -9,6 +9,7 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DTC.Core.Extensions;
 using Newtonsoft.Json;
@@ -276,6 +277,35 @@ public class NeuralNetwork
                 {
                     if (random.NextDouble() < mutationRate)
                         m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + random.GaussianSample(0.2));
+                }
+            }
+        }
+
+        RebuildFlatWeights();
+    }
+
+    public void Mutate(int mutationCount, double mutationStrength, Random random = null)
+    {
+        random ??= Random.Shared;
+        var totalWeightCount = m_weights.Sum(layer => layer.Sum(neuron => neuron.Length));
+        mutationCount = Math.Clamp(mutationCount, 0, totalWeightCount);
+        mutationStrength = Math.Max(0.0, mutationStrength);
+        var mutationIndexes = new HashSet<int>();
+        while (mutationIndexes.Count < mutationCount)
+            mutationIndexes.Add(random.Next(totalWeightCount));
+
+        var weightIndex = 0;
+        for (var l = 0; l < m_weights.Length; l++)
+        {
+            for (var j = 0; j < m_weights[l].Length; j++)
+            {
+                for (var i = 0; i < m_weights[l][j].Length; i++, weightIndex++)
+                {
+                    if (mutationIndexes.Contains(weightIndex))
+                        m_weights[l][j][i] = Math.Clamp(
+                            m_weights[l][j][i] + random.GaussianSample(mutationStrength),
+                            -1.0,
+                            1.0);
                 }
             }
         }
