@@ -238,10 +238,11 @@ public class NeuralNetwork
     {
         for (var l = 0; l < m_weights.Length; l++)
         {
+            var weightLimit = GetWeightLimit(l);
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
-                    m_weights[l][j][i] = Random.Shared.NextDouble() * 2 - 1;
+                    m_weights[l][j][i] = (Random.Shared.NextDouble() * 2.0 - 1.0) * weightLimit;
             }
         }
 
@@ -271,12 +272,16 @@ public class NeuralNetwork
         random ??= Random.Shared;
         for (var l = 0; l < m_weights.Length; l++)
         {
+            var weightLimit = GetWeightLimit(l);
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++)
                 {
                     if (random.NextDouble() < mutationRate)
-                        m_weights[l][j][i] = Math.Tanh(m_weights[l][j][i] + random.GaussianSample(0.2));
+                        m_weights[l][j][i] = Math.Clamp(
+                            m_weights[l][j][i] + random.GaussianSample(0.2),
+                            -weightLimit,
+                            weightLimit);
                 }
             }
         }
@@ -297,6 +302,7 @@ public class NeuralNetwork
         var weightIndex = 0;
         for (var l = 0; l < m_weights.Length; l++)
         {
+            var weightLimit = GetWeightLimit(l);
             for (var j = 0; j < m_weights[l].Length; j++)
             {
                 for (var i = 0; i < m_weights[l][j].Length; i++, weightIndex++)
@@ -304,13 +310,47 @@ public class NeuralNetwork
                     if (mutationIndexes.Contains(weightIndex))
                         m_weights[l][j][i] = Math.Clamp(
                             m_weights[l][j][i] + random.GaussianSample(mutationStrength),
-                            -1.0,
-                            1.0);
+                            -weightLimit,
+                            weightLimit);
                 }
             }
         }
 
         RebuildFlatWeights();
+    }
+
+    public void MutateOutput(int outputIndex, int mutationCount, double mutationStrength, Random random = null)
+    {
+        if (outputIndex < 0 || outputIndex >= m_weights[^1].Length)
+            throw new ArgumentOutOfRangeException(nameof(outputIndex));
+
+        random ??= Random.Shared;
+        var outputWeights = m_weights[^1][outputIndex];
+        var weightLimit = GetWeightLimit(m_weights.Length - 1);
+        mutationCount = Math.Clamp(mutationCount, 0, outputWeights.Length);
+        mutationStrength = Math.Max(0.0, mutationStrength);
+        var mutationIndexes = new HashSet<int>();
+        while (mutationIndexes.Count < mutationCount)
+            mutationIndexes.Add(random.Next(outputWeights.Length));
+
+        foreach (var mutationIndex in mutationIndexes)
+        {
+            outputWeights[mutationIndex] = Math.Clamp(
+                outputWeights[mutationIndex] + random.GaussianSample(mutationStrength),
+                -weightLimit,
+                weightLimit);
+        }
+
+        RebuildFlatWeights();
+    }
+
+    private double GetWeightLimit(int layer)
+    {
+        var inputSize = m_layerSizes[layer];
+        var outputSize = m_layerSizes[layer + 1];
+        return layer == m_weights.Length - 1
+            ? Math.Sqrt(6.0 / (inputSize + outputSize))
+            : Math.Sqrt(6.0 / inputSize);
     }
 
     public NeuralNetwork Clone()
