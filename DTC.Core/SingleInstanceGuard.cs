@@ -10,6 +10,7 @@
 // THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -26,10 +27,14 @@ namespace DTC.Core;
 public sealed class SingleInstanceGuard : IDisposable
 {
     private readonly Mutex m_mutex;
+    private readonly FileStream m_lockFile;
     private bool m_isDisposed;
 
-    private SingleInstanceGuard(Mutex mutex) =>
+    private SingleInstanceGuard(Mutex mutex, FileStream lockFile)
+    {
         m_mutex = mutex ?? throw new ArgumentNullException(nameof(mutex));
+        m_lockFile = lockFile;
+    }
 
     /// <summary>
     /// Attempts to acquire the single-instance mutex for the supplied application name.
@@ -38,13 +43,23 @@ public sealed class SingleInstanceGuard : IDisposable
     /// <returns>A guard that owns the mutex, or <c>null</c> when another process already owns it.</returns>
     public static SingleInstanceGuard TryAcquire(string applicationName)
     {
-        var mutexName = CreateMutexName(applicationName);
+        var safeName = CreateSafeName(applicationName);
+        var mutexName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $@"Local\{safeName}" : safeName;
         var mutex = new Mutex(true, mutexName, out var isFirstInstance);
-        if (isFirstInstance)
-            return new SingleInstanceGuard(mutex);
+        if (!isFirstInstance)
+        {
+            mutex.Dispose();
+            return null;
+        }
 
-        mutex.Dispose();
-        return null;
+        var lockFile = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? null : TryAcquireFileLock(safeName);
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && lockFile == null)
+        {
+            mutex.ReleaseMutex();
+            mutex.Dispose();
+            return null;
+        }
+        return new SingleInstanceGuard(mutex, lockFile);
     }
 
     /// <summary>
@@ -56,11 +71,34 @@ public sealed class SingleInstanceGuard : IDisposable
             return;
 
         m_isDisposed = true;
+        if (m_lockFile != null)
+            m_lockFile.Dispose();
         m_mutex.ReleaseMutex();
         m_mutex.Dispose();
     }
 
-    private static string CreateMutexName(string applicationName)
+    private static FileStream TryAcquireFileLock(string safeName)
+    {
+        var folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "DTC.Core",
+            "SingleInstance");
+        Directory.CreateDirectory(folder);
+        try
+        {
+            return new FileStream(
+                Path.Combine(folder, safeName + ".lock"),
+                FileMode.OpenOrCreate,
+                FileAccess.ReadWrite,
+                FileShare.None);
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
+    private static string CreateSafeName(string applicationName)
     {
         if (string.IsNullOrWhiteSpace(applicationName))
             throw new ArgumentException("Application name is required.", nameof(applicationName));
@@ -69,8 +107,6 @@ public sealed class SingleInstanceGuard : IDisposable
             .Select(ch => char.IsLetterOrDigit(ch) ? ch : '_')
             .ToArray());
 
-        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? $@"Local\{safeName}"
-            : safeName;
+        return safeName;
     }
 }
